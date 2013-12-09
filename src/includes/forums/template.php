@@ -511,7 +511,7 @@ function bbp_forum_last_active_time( $forum_id = 0 ) {
 	 *
 	 * @param int $forum_id Optional. Forum id
 	 * @uses bbp_get_forum_id() To get the forum id
-	 * @uses get_post_meta() To retrieve forum last active meta
+	 * @uses get_post_field() To retrieve forum last active meta
 	 * @uses bbp_get_forum_last_reply_id() To get forum's last reply id
 	 * @uses get_post_field() To get the post date of the reply
 	 * @uses bbp_get_forum_last_topic_id() To get forum's last topic id
@@ -527,7 +527,7 @@ function bbp_forum_last_active_time( $forum_id = 0 ) {
 
 		// Verify forum and get last active meta
 		$forum_id    = bbp_get_forum_id( $forum_id );
-		$last_active = get_post_meta( $forum_id, '_bbp_last_active_time', true );
+		$last_active = get_post_field( 'post_modified', $forum_id );
 
 		if ( empty( $last_active ) ) {
 			$reply_id = bbp_get_forum_last_reply_id( $forum_id );

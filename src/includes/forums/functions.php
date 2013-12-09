@@ -1205,9 +1205,7 @@ function bbp_update_forum_last_topic_id( $forum_id = 0, $topic_id = 0 ) {
 		$post_vars = array(
 			'post_parent' => $forum_id,
 			'post_type'   => bbp_get_topic_post_type(),
-			'meta_key'    => '_bbp_last_active_time',
-			'meta_type'   => 'DATETIME',
-			'orderby'     => 'meta_value',
+			'orderby'     => 'modified',
 			'numberposts' => 1
 		);
 
@@ -1367,6 +1365,25 @@ function bbp_update_forum_last_active_id( $forum_id = 0, $active_id = 0 ) {
 }
 
 /**
+ * Updates the post_modified/post_modified_gmt fields of a forum.
+ *
+ * @since bbPress (rXXXX)
+ *
+ * @param int $post_id Forum post_id
+ * @param string $post_modified MySQL timestamp 'Y-m-d H:i:s'
+ * @param string $post_modified_gmt MySQL timestamp 'Y-m-d H:i:s'. Defaults to false.
+ * @uses bbp_update_post_modified_helper() To update the post_modified/post_modified_gmt fields
+ * @return int|bool The number of rows updated, or false on error.
+ */
+function bbp_update_forum_post_modified( $forum_id, $post_modified, $post_modified_gmt = false ) {
+
+	// Validate the forum_id
+	$topic_id = bbp_get_forum_id( $forum_id );
+
+	return bbp_update_post_modified_helper( $forum_id, $post_modified, $post_modified_gmt, 'forum' );
+}
+
+/**
  * Update the forums last active date/time (aka freshness)
  *
  * @since bbPress (r2680)
@@ -1392,6 +1409,7 @@ function bbp_update_forum_last_active_time( $forum_id = 0, $new_time = '' ) {
 	// Update only if there is a time
 	if ( !empty( $new_time ) ) {
 		update_post_meta( $forum_id, '_bbp_last_active_time', $new_time );
+		bbp_update_forum_post_modified( $forum_id, $new_time );
 	}
 
 	return (int) apply_filters( 'bbp_update_forum_last_active', $new_time, $forum_id );

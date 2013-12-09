@@ -371,6 +371,51 @@ function bbp_fix_post_author( $data = array(), $postarr = array() ) {
 }
 
 /**
+ * Fix post modified times on post save
+ *
+ * When a forum or topic is update, the post_modified and post_modified_gmt
+ * fields are updated. Since these fields are used for freshness data, we
+ * don't want to stomp out the current data. This keeps the post_modified(_gmt)
+ * fields at their current status, and moves the last edit time (in GMT) to post
+ * meta as '_bbp_last_edit_time_gmt'
+ *
+ * @since bbPress (rXXXX)
+ *
+ * @param array $data Post data
+ * @param array $postarr Original post array (includes post id)
+ * @uses bbp_get_topic_post_type() To get the topic post type
+ * @uses bbp_get_reply_post_type() To get the reply post type
+ * @uses bbp_is_post_request() To determine if we're in a POST request
+ * @uses update_post_meta() To update the '_bbp_last_edit_time_gmt' post meta field
+ * @uses get_post_field() To get the current post_modified(_gmt) fields
+ * @return array Data
+ */
+function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
+
+	// Post is not being updated, return
+	if ( empty( $postarr['ID'] ) )
+		return $data;
+
+	// Post is not a forum or topic, return
+	if ( !in_array( $data['post_type'], array( bbp_get_forum_post_type(), bbp_get_topic_post_type() ) ) )
+		return $data;
+
+	// Are we editing?
+	if ( !bbp_is_post_request() && !in_array( $_POST['action'], array( 'bbp-edit-forum', 'bbp-edit-topic', 'editpost' ) ) )
+		return $data;
+
+	// Set the last edited time in post meta
+	update_post_meta( $postarr['ID'], '_bbp_last_edit_time_gmt', $data['post_modified_gmt'] );
+
+	// The post is being updated. It is a topic or a reply and is written by an anonymous user.
+	// Set the post_modified(_gmt) time back to their current values
+	$data['post_modified']     = get_post_field( 'post_modified',     $postarr['ID'], 'raw' );
+	$data['post_modified_gmt'] = get_post_field( 'post_modified_gmt', $postarr['ID'], 'raw' );
+
+	return $data;
+}
+
+/**
  * Check the date against the _bbp_edit_lock setting.
  *
  * @since bbPress (r3133)
@@ -1677,6 +1722,86 @@ function bbp_get_all_child_ids( $parent_id = 0, $post_type = 'post' ) {
 
 	// Filter and return
 	return apply_filters( 'bbp_get_all_child_ids', $child_ids, (int) $parent_id, $post_type );
+}
+
+/**
+ * Updates the post_modified and post_modified_gmt fields of a topic/forum.
+ *
+ * This is just a helper function, with minimal data validation. Therefore,
+ * you will be better served using the appropriate wrapper funtions
+ * bbp_update_topic_post_modified() or bbp_update_forum_post_modified().
+ * Proper data validation should be performed before calling these functions.
+ * See bbp_update_forum_last_active_time() or bbp_update_topic_last_active_time()
+ * for examples on how to use.
+ *
+ * @since bbPress (rXXXX)
+ * @access private
+ *
+ * @global WPDB $wpdb
+ * @param int $post_id Forum/topic post_id
+ * @param string $post_modified MySQL timestamp 'Y-m-d H:i:s'
+ * @param string $post_modified_gmt MySQL timestamp 'Y-m-d H:i:s'. Defaults to false.
+ * @param string $type 'topic' or 'forum'
+ * @uses wpdb::update() To update the post_modified/post_modified_gmt fields
+ * @return int|bool The number of rows updated, or false on error.
+ */
+function bbp_update_post_modified_helper( $post_id, $post_modified, $post_modified_gmt = false, $type ) {
+
+	// Validate the post_id
+	$post_id   = call_user_func( "bbp_get_{$type}_id", $post_id );
+
+	// Get the post_type. This is to mitigate the likelihood of getting a valid
+	// post_id that's in the wrong post_type, and not the one we'd like to update
+	$post_type = call_user_func( "bbp_get_{$type}_post_type" );
+
+	// Make sure we have at least one date
+	if ( empty( $post_modified ) && empty( $post_modified_gmt ) ) {
+		return false;
+
+	// No post_modified_gmt provided
+	} elseif ( empty( $post_modified_gmt ) ) {
+		$post_modified     = date(   'Y-m-d H:i:s', strtotime( $post_modified ) );
+		$post_modified_gmt = gmdate( 'Y-m-d H:i:s', strtotime( $post_modified ) );
+
+	// No post_modified provided
+	} elseif ( empty( $post_modified ) ) {
+		$post_modified_gmt = gmdate( 'Y-m-d H:i:s', strtotime( $post_modified_gmt ) );
+		$post_modified     = date(   'Y-m-d H:i:s', strtotime( $post_modified_gmt ) );
+
+	// Looks good, but let's validate
+	} else {
+		$post_modified     = date(   'Y-m-d H:i:s', strtotime( $post_modified )     );
+		$post_modified_gmt = gmdate( 'Y-m-d H:i:s', strtotime( $post_modified_gmt ) );
+	}
+
+	// Grab the database global
+	global $wpdb;
+
+	// Update the, uh..., date?
+	return $wpdb->update(
+		// Table
+		$wpdb->posts,
+		// Field/value pairs to update
+		array(
+			'post_modified'     => $post_modified,
+			'post_modified_gmt' => $post_modified_gmt
+		),
+		// Where conditions
+		array(
+			'ID'        => $post_id,
+			'post_type' => $post_type
+		),
+		// Value formats for wpdb::prepare
+		array(
+			'%s',
+			'%s'
+		),
+		// Value formats for where conditions
+		array(
+			'%d',
+			'%s'
+		)
+	);
 }
 
 /** Globals *******************************************************************/

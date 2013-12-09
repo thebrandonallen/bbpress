@@ -51,6 +51,9 @@ add_filter( 'plugin_locale',           'bbp_plugin_locale',      10, 2 );
 // Fix post author id for anonymous posts (set it back to 0) when the post status is changed
 add_filter( 'wp_insert_post_data', 'bbp_fix_post_author', 30, 2 );
 
+// Fix post modified and post modified gmt time for forums and topics when the post is edited
+add_filter( 'wp_insert_post_data', 'bbp_fix_post_modified', 30, 2 );
+
 // Force comments_status on bbPress post types
 add_filter( 'comments_open', 'bbp_force_comment_status' );
 

@@ -152,9 +152,7 @@ function bbp_has_topics( $args = '' ) {
 	$default = array(
 		'post_type'      => bbp_get_topic_post_type(), // Narrow query down to bbPress topics
 		'post_parent'    => $default_post_parent,      // Forum ID
-		'meta_key'       => '_bbp_last_active_time',   // Make sure topic has some last activity time
-		'meta_type'      => 'DATETIME',
-		'orderby'        => 'meta_value',              // 'meta_value', 'author', 'date', 'title', 'modified', 'parent', rand',
+		'orderby'        => 'modified',                // 'meta_value', 'author', 'date', 'title', 'modified', 'parent', rand',
 		'order'          => 'DESC',                    // 'ASC', 'DESC'
 		'posts_per_page' => bbp_get_topics_per_page(), // Topics per page
 		'paged'          => bbp_get_paged(),           // Page Number
@@ -289,9 +287,7 @@ function bbp_has_topics( $args = '' ) {
 				$sticky_query = array(
 					'post_type'   => bbp_get_topic_post_type(),
 					'post_parent' => 'any',
-					'meta_key'    => '_bbp_last_active_time',
-					'meta_type'   => 'DATETIME',
-					'orderby'     => 'meta_value',
+					'orderby'     => 'modified',
 					'order'       => 'DESC',
 					'include'     => $stickies
 				);
@@ -1845,7 +1841,7 @@ function bbp_topic_last_active_time( $topic_id = 0 ) {
 	 *
 	 * @param int $topic_id Optional. Topic id
 	 * @uses bbp_get_topic_id() To get topic id
-	 * @uses get_post_meta() To get the topic lst active meta
+	 * @uses get_post_field() To get the topic lst active meta
 	 * @uses bbp_get_topic_last_reply_id() To get topic last reply id
 	 * @uses get_post_field() To get the post date of topic/reply
 	 * @uses bbp_convert_date() To convert date
@@ -1858,7 +1854,7 @@ function bbp_topic_last_active_time( $topic_id = 0 ) {
 		$topic_id = bbp_get_topic_id( $topic_id );
 
 		// Try to get the most accurate freshness time possible
-		$last_active = get_post_meta( $topic_id, '_bbp_last_active_time', true );
+		$last_active = get_post_field( 'post_modified', $topic_id );
 		if ( empty( $last_active ) ) {
 			$reply_id = bbp_get_topic_last_reply_id( $topic_id );
 			if ( ! empty( $reply_id ) ) {

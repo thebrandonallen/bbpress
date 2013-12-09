@@ -744,9 +744,7 @@ class BBP_Topics_Widget extends WP_Widget {
 					'post_status'         => array( bbp_get_public_status_id(), bbp_get_closed_status_id() ),
 					'ignore_sticky_posts' => true,
 					'no_found_rows'       => true,
-					'meta_key'            => '_bbp_last_active_time',
-					'meta_type'           => 'DATETIME',
-					'orderby'             => 'meta_value',
+					'orderby'             => 'modified',
 					'order'               => 'DESC',
 				);
 				break;
