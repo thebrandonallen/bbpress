@@ -2589,10 +2589,8 @@ function bbp_update_topic_last_active_time( $topic_id = 0, $new_time = '' ) {
 	// If it's a reply, then get the parent (topic id)
 	if ( bbp_is_reply( $topic_id ) ) {
 		$topic_id = bbp_get_reply_topic_id( $topic_id );
-	} elseif ( bbp_is_topic( $topic_id ) ) {
-		$topic_id = bbp_get_topic_id( $topic_id );
 	} else {
-		return;
+		$topic_id = bbp_get_topic_id( $topic_id );
 	}
 
 	// Check time and use current if empty
