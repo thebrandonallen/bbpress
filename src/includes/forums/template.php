@@ -505,18 +505,13 @@ function bbp_forum_last_active_time( $forum_id = 0 ) {
 	echo bbp_get_forum_last_active_time( $forum_id );
 }
 	/**
-	 * Return the forums last update date/time (aka freshness)
+	 * Return the forum's last update date/time (aka freshness)
 	 *
 	 * @since bbPress (r2464)
 	 *
 	 * @param int $forum_id Optional. Forum id
 	 * @uses bbp_get_forum_id() To get the forum id
-	 * @uses get_post_field() To retrieve forum last active meta
-	 * @uses bbp_get_forum_last_reply_id() To get forum's last reply id
-	 * @uses get_post_field() To get the post date of the reply
-	 * @uses bbp_get_forum_last_topic_id() To get forum's last topic id
-	 * @uses bbp_get_topic_last_active_time() To get time when the topic was
-	 *                                    last active
+	 * @uses get_post_field() To get the post_modified of the forum
 	 * @uses bbp_convert_date() To convert the date
 	 * @uses bbp_get_time_since() To get time in since format
 	 * @uses apply_filters() Calls 'bbp_get_forum_last_active' with last
@@ -525,24 +520,14 @@ function bbp_forum_last_active_time( $forum_id = 0 ) {
 	 */
 	function bbp_get_forum_last_active_time( $forum_id = 0 ) {
 
-		// Verify forum and get last active meta
+		// Verify forum and get last active time
 		$forum_id    = bbp_get_forum_id( $forum_id );
 		$last_active = get_post_field( 'post_modified', $forum_id );
 
-		if ( empty( $last_active ) ) {
-			$reply_id = bbp_get_forum_last_reply_id( $forum_id );
-			if ( !empty( $reply_id ) ) {
-				$last_active = get_post_field( 'post_date', $reply_id );
-			} else {
-				$topic_id = bbp_get_forum_last_topic_id( $forum_id );
-				if ( !empty( $topic_id ) ) {
-					$last_active = bbp_get_topic_last_active_time( $topic_id );
-				}
-			}
-		}
-
+		// Convert to time since format
 		$active_time = !empty( $last_active ) ? bbp_get_time_since( bbp_convert_date( $last_active ) ) : '';
 
+		// Return the time since
 		return apply_filters( 'bbp_get_forum_last_active', $active_time, $forum_id );
 	}
 

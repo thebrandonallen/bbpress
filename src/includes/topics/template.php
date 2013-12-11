@@ -97,6 +97,7 @@ function bbp_get_topic_post_type_supports() {
  * - New Style: Topics appear as "lead" posts, ahead of replies
  *
  * @since bbPress (r2954)
+ *
  * @param $show_lead Optional. Default false
  * @return bool Yes if the topic appears as a lead, otherwise false
  */
@@ -1835,39 +1836,30 @@ function bbp_topic_last_active_time( $topic_id = 0 ) {
 	echo bbp_get_topic_last_active_time( $topic_id );
 }
 	/**
-	 * Return the topics last update date/time (aka freshness)
+	 * Return the topic's last update date/time (aka freshness)
 	 *
 	 * @since bbPress (r2625)
 	 *
 	 * @param int $topic_id Optional. Topic id
 	 * @uses bbp_get_topic_id() To get topic id
-	 * @uses get_post_field() To get the topic lst active meta
-	 * @uses bbp_get_topic_last_reply_id() To get topic last reply id
-	 * @uses get_post_field() To get the post date of topic/reply
-	 * @uses bbp_convert_date() To convert date
+	 * @uses get_post_field() To get the post_modified of the topic
+	 * @uses bbp_convert_date() To convert the date
 	 * @uses bbp_get_time_since() To get time in since format
 	 * @uses apply_filters() Calls 'bbp_get_topic_last_active' with topic
 	 *                        freshness and topic id
 	 * @return string Topic freshness
 	 */
 	function bbp_get_topic_last_active_time( $topic_id = 0 ) {
+
+		// Verify forum and get last active time
 		$topic_id = bbp_get_topic_id( $topic_id );
-
-		// Try to get the most accurate freshness time possible
 		$last_active = get_post_field( 'post_modified', $topic_id );
-		if ( empty( $last_active ) ) {
-			$reply_id = bbp_get_topic_last_reply_id( $topic_id );
-			if ( ! empty( $reply_id ) ) {
-				$last_active = get_post_field( 'post_date', $reply_id );
-			} else {
-				$last_active = get_post_field( 'post_date', $topic_id );
-			}
-		}
 
-		$last_active = ! empty( $last_active ) ? bbp_get_time_since( bbp_convert_date( $last_active ) ) : '';
+		// Convert to time since format
+		$active_time = !empty( $last_active ) ? bbp_get_time_since( bbp_convert_date( $last_active ) ) : '';
 
 		// Return the time since
-		return apply_filters( 'bbp_get_topic_last_active', $last_active, $topic_id );
+		return apply_filters( 'bbp_get_topic_last_active', $active_time, $topic_id );
 	}
 
 /** Topic Subscriptions *******************************************************/

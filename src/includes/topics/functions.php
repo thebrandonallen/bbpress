@@ -2553,35 +2553,22 @@ function bbp_update_topic_last_active_id( $topic_id = 0, $active_id = 0 ) {
 }
 
 /**
- * Updates the post_modified/post_modified_gmt fields of a topic.
- *
- * @since bbPress (rXXXX)
- *
- * @param int $post_id Topic post_id
- * @param string $post_modified MySQL timestamp 'Y-m-d H:i:s'
- * @param string $post_modified_gmt MySQL timestamp 'Y-m-d H:i:s'. Defaults to false.
- * @uses bbp_update_post_modified_helper() To update the post_modified/post_modified_gmt fields
- * @return int|bool The number of rows updated, or false on error.
- */
-function bbp_update_topic_post_modified( $topic_id, $post_modified, $post_modified_gmt = false ) {
-
-	// Validate the topic_id
-	$topic_id = bbp_get_topic_id( $topic_id );
-
-	return bbp_update_post_modified_helper( $topic_id, $post_modified, $post_modified_gmt, 'topic' );
-}
-
-/**
- * Update the topics last active date/time (aka freshness)
+ * Update the topic's last active date/time (aka freshness)
  *
  * @since bbPress (r2680)
  *
  * @param int $topic_id Optional. Topic id
  * @param string $new_time Optional. New time in mysql format
- * @uses bbp_get_topic_id() To get the topic id
+ * @uses bbp_is_reply() To check if the id passed is a reply
  * @uses bbp_get_reply_topic_id() To get the reply topic id
- * @uses current_time() To get the current time
+ * @uses bbp_get_topic_id() To get the topic id
+ * @uses bbp_get_reply_post_type() To get the reply post type
+ * @uses bbp_get_public_child_last_id() To get the last public reply id
+ * @uses get_post_field() To get the post_modified date of the topic
  * @uses update_post_meta() To update the topic last active meta
+ * @uses wp_update_post() To update the post_modified date of the topic
+ * @uses apply_filters() Calls 'bbp_update_topic_last_active' with the new time
+ *                        and topic id
  * @return bool True on success, false on failure
  */
 function bbp_update_topic_last_active_time( $topic_id = 0, $new_time = '' ) {
@@ -2600,8 +2587,16 @@ function bbp_update_topic_last_active_time( $topic_id = 0, $new_time = '' ) {
 
 	// Update only if published
 	if ( ! empty( $new_time ) ) {
+
+		// Update topic's meta - not used since 2.6
 		update_post_meta( $topic_id, '_bbp_last_active_time', $new_time );
-		bbp_update_topic_post_modified( $topic_id, $new_time );
+
+		// Update topic's post_modified date - since 2.6
+		wp_update_post( array(
+			'ID'                => $topic_id,
+			'post_modified'     => $new_time,
+			'post_modified_gmt' => get_gmt_from_date( $new_time )
+		) );
 	}
 
 	return apply_filters( 'bbp_update_topic_last_active_time', $new_time, $topic_id );

@@ -1365,35 +1365,17 @@ function bbp_update_forum_last_active_id( $forum_id = 0, $active_id = 0 ) {
 }
 
 /**
- * Updates the post_modified/post_modified_gmt fields of a forum.
- *
- * @since bbPress (rXXXX)
- *
- * @param int $post_id Forum post_id
- * @param string $post_modified MySQL timestamp 'Y-m-d H:i:s'
- * @param string $post_modified_gmt MySQL timestamp 'Y-m-d H:i:s'. Defaults to false.
- * @uses bbp_update_post_modified_helper() To update the post_modified/post_modified_gmt fields
- * @return int|bool The number of rows updated, or false on error.
- */
-function bbp_update_forum_post_modified( $forum_id, $post_modified, $post_modified_gmt = false ) {
-
-	// Validate the forum_id
-	$topic_id = bbp_get_forum_id( $forum_id );
-
-	return bbp_update_post_modified_helper( $forum_id, $post_modified, $post_modified_gmt, 'forum' );
-}
-
-/**
- * Update the forums last active date/time (aka freshness)
+ * Update the forum's last active date/time (aka freshness)
  *
  * @since bbPress (r2680)
  *
- * @param int $forum_id Optional. Topic id
+ * @param int $forum_id Optional. Forum id
  * @param string $new_time Optional. New time in mysql format
  * @uses bbp_get_forum_id() To get the forum id
  * @uses bbp_get_forum_last_active_id() To get the forum's last post id
- * @uses get_post_field() To get the post date of the forum's last post
- * @uses update_post_meta() To update the forum last active time
+ * @uses get_post_field() To get the post_modified date of the forum
+ * @uses update_post_meta() To update the forum last active meta
+ * @uses wp_update_post() To update the post_modified date of the forum
  * @uses apply_filters() Calls 'bbp_update_forum_last_active' with the new time
  *                        and forum id
  * @return bool True on success, false on failure
@@ -1408,8 +1390,16 @@ function bbp_update_forum_last_active_time( $forum_id = 0, $new_time = '' ) {
 
 	// Update only if there is a time
 	if ( !empty( $new_time ) ) {
+
+		// Update forum's meta - not used since 2.6
 		update_post_meta( $forum_id, '_bbp_last_active_time', $new_time );
-		bbp_update_forum_post_modified( $forum_id, $new_time );
+
+		// Update forum's post_modified date - since 2.6
+		wp_update_post( array(
+			'ID'                => $forum_id,
+			'post_modified'     => $new_time,
+			'post_modified_gmt' => get_gmt_from_date( $new_time )
+		) );
 	}
 
 	return (int) apply_filters( 'bbp_update_forum_last_active', $new_time, $forum_id );
@@ -1973,8 +1963,8 @@ function bbp_forum_query_subforum_ids( $forum_id ) {
  * @return Position change based on sort
  */
 function _bbp_forum_query_usort_subforum_ids( $a = 0, $b = 0 ) {
-	$ta = get_post_meta( $a, '_bbp_last_active_time', true );
-	$tb = get_post_meta( $b, '_bbp_last_active_time', true );
+	$ta = get_post_field( 'post_modified', $a );
+	$tb = get_post_field( 'post_modified', $b );
 	return ( $ta < $tb ) ? -1 : 1;
 }
 
