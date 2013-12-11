@@ -371,46 +371,91 @@ function bbp_fix_post_author( $data = array(), $postarr = array() ) {
 }
 
 /**
- * Fix post modified times on post save
+ * Fix post modified times on post save for topics/forums
  *
- * When a forum or topic is update, the post_modified and post_modified_gmt
+ * When a forum or topic is updated, the post_modified and post_modified_gmt
  * fields are updated. Since these fields are used for freshness data, we
  * don't want to stomp out the current data. This keeps the post_modified(_gmt)
  * fields at their current status, and moves the last edit time (in GMT) to post
- * meta as '_bbp_last_edit_time_gmt'
+ * meta as '_bbp_last_edit_time_gmt'. This also solves the problem of not being
+ * able to pass our own custom post_modified(_gmt) values
+ *
+ * @since bbPress (rXXXX)
+ *
+ * @param array $data Post data
+ * @param array $postarr Original post array data
+ * @uses bbp_get_topic_post_type() To get the topic post type
+ * @uses bbp_get_reply_post_type() To get the reply post type
+ * @uses bbp_is_post_request() To determine if we're in a POST request
+ * @uses update_post_meta() To update the '_bbp_last_edit_time_gmt' post meta field
+ * @return array Post data
+ */
+function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
+
+	// Post is not being updated, return
+	if ( empty( $postarr['ID'] ) || ( empty( $postarr['post_modified'] ) && empty( $postarr['post_modified_gmt'] ) ) ) {
+		return $data;
+	}
+
+	// Post is not a forum or topic, return
+	if ( !in_array( $postarr['post_type'], array( bbp_get_forum_post_type(), bbp_get_topic_post_type() ) ) ) {
+		return $data;
+	}
+
+	// Are we editing?
+	if ( bbp_is_post_request() && in_array( $_POST['action'], array( 'bbp-edit-forum', 'bbp-edit-topic', 'editpost' ) ) ) {
+
+		// Set the last edited time in post meta to the new post_modified_gmt
+		update_post_meta( $postarr['ID'], '_bbp_last_edit_time_gmt', $data['post_modified_gmt'] );
+	}
+
+	// Reset post_modified and post_modified_gmt back to their original values
+	$data['post_modified']     = $postarr['post_modified'];
+	$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+
+	return $data;
+}
+
+/**
+ * Fix revision post_(date/date_gmt/modified/modified_gmt) times
+ *
+ * When a revision is created, _wp_post_revision_fields() sets the post_date(_gmt)
+ * fields to the post_modified time of the of the post being revised. Since we
+ * are now using the post_modified(_gmt) fields for freshness times, these fields
+ * are no longer accurate with respect to revisions. Here we reset the post_*
+ * times to back their proper values
  *
  * @since bbPress (rXXXX)
  *
  * @param array $data Post data
  * @param array $postarr Original post array (includes post id)
- * @uses bbp_get_topic_post_type() To get the topic post type
- * @uses bbp_get_reply_post_type() To get the reply post type
- * @uses bbp_is_post_request() To determine if we're in a POST request
- * @uses update_post_meta() To update the '_bbp_last_edit_time_gmt' post meta field
- * @uses get_post_field() To get the current post_modified(_gmt) fields
- * @return array Data
+ * @uses bbp_is_topic() To make sure the revision is of a topic
+ * @uses get_post_meta() To get the '_bbp_last_edit_time_gmt' post meta field
+ * @uses get_date_from_gmt() To get the localized date from a gmt date
+ * @uses current_time() To get the current_time in mysql format
+ * @return array Post data
  */
-function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
+function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 
-	// Post is not being updated, return
-	if ( empty( $postarr['ID'] ) )
+	// Don't even bother. This is not a revision or we're updating
+	if ( 'revision' !== $postarr['post_type'] || !empty( $postarr['ID'] ) ) {
 		return $data;
+	}
 
-	// Post is not a forum or topic, return
-	if ( !in_array( $data['post_type'], array( bbp_get_forum_post_type(), bbp_get_topic_post_type() ) ) )
-		return $data;
+	// Make sure we're working with a revision of a topic or forum
+	// TODO: Add a bbp_is_forum when forum revisions are added
+	if ( bbp_is_topic( $postarr['post_parent'] ) ) {
+		$post_id = $postarr['post_parent'];
+	}
 
-	// Are we editing?
-	if ( !bbp_is_post_request() && !in_array( $_POST['action'], array( 'bbp-edit-forum', 'bbp-edit-topic', 'editpost' ) ) )
-		return $data;
+	// Get the true last edited time from post meta
+	$edit_time = get_post_meta( $post_id, '_bbp_last_edit_time_gmt', true );
 
-	// Set the last edited time in post meta
-	update_post_meta( $postarr['ID'], '_bbp_last_edit_time_gmt', $data['post_modified_gmt'] );
-
-	// The post is being updated. It is a topic or a reply and is written by an anonymous user.
-	// Set the post_modified(_gmt) time back to their current values
-	$data['post_modified']     = get_post_field( 'post_modified',     $postarr['ID'], 'raw' );
-	$data['post_modified_gmt'] = get_post_field( 'post_modified_gmt', $postarr['ID'], 'raw' );
+	// Reset post_modified and post_modified_gmt back to their original values
+	$data['post_date']         = get_date_from_gmt( $edit_time );
+	$data['post_date_gmt']     = $edit_time;
+	$data['post_modified']     = current_time( 'mysql' );
+	$data['post_modified_gmt'] = current_time( 'mysql', 1 );
 
 	return $data;
 }
