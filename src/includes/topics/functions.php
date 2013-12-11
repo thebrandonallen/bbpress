@@ -2591,12 +2591,25 @@ function bbp_update_topic_last_active_time( $topic_id = 0, $new_time = '' ) {
 		// Update topic's meta - not used since 2.6
 		update_post_meta( $topic_id, '_bbp_last_active_time', $new_time );
 
+		// Toggle revisions to avoid duplicates
+		$revisions_removed = false;
+		if ( post_type_supports( bbp_get_topic_post_type(), 'revisions' ) ) {
+			$revisions_removed = true;
+			remove_post_type_support( bbp_get_topic_post_type(), 'revisions' );
+		}
+
 		// Update topic's post_modified date - since 2.6
 		wp_update_post( array(
 			'ID'                => $topic_id,
 			'post_modified'     => $new_time,
 			'post_modified_gmt' => get_gmt_from_date( $new_time )
 		) );
+
+		// Toggle revisions back on
+		if ( true === $revisions_removed ) {
+			$revisions_removed = false;
+			add_post_type_support( bbp_get_topic_post_type(), 'revisions' );
+		}
 	}
 
 	return apply_filters( 'bbp_update_topic_last_active_time', $new_time, $topic_id );
