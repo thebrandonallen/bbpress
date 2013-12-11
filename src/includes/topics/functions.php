@@ -2566,7 +2566,11 @@ function bbp_update_topic_last_active_id( $topic_id = 0, $active_id = 0 ) {
  * @uses bbp_get_public_child_last_id() To get the last public reply id
  * @uses get_post_field() To get the post_modified date of the topic
  * @uses update_post_meta() To update the topic last active meta
+ * @uses bbp_get_reply_post_type() To get the topic post type
+ * @uses post_type_supports() To check if the them supports revisions
+ * @uses remove_post_type_support() To remove support for revisions
  * @uses wp_update_post() To update the post_modified date of the topic
+ * @uses remove_post_type_support() To add support for revisions
  * @uses apply_filters() Calls 'bbp_update_topic_last_active' with the new time
  *                        and topic id
  * @return bool True on success, false on failure
