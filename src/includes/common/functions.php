@@ -393,7 +393,12 @@ function bbp_fix_post_author( $data = array(), $postarr = array() ) {
 function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
 
 	// Post is not being updated, return
-	if ( empty( $postarr['ID'] ) || ( empty( $postarr['post_modified'] ) && empty( $postarr['post_modified_gmt'] ) ) ) {
+	if ( empty( $postarr['ID'] ) ) {
+		return $data;
+	}
+
+	// We're not updating the last active time, return
+	if ( empty( $postarr['post_modified'] ) && empty( $postarr['post_modified_gmt'] ) ) {
 		return $data;
 	}
 
@@ -443,8 +448,7 @@ function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 	}
 
 	// Make sure we're working with a revision of a topic or forum
-	// TODO: Add a bbp_is_forum when forum revisions are added
-	if ( bbp_is_topic( $postarr['post_parent'] ) ) {
+	if ( bbp_is_topic( $postarr['post_parent'] ) || bbp_is_forum( $postarr['post_parent'] ) ) {
 		$post_id = $postarr['post_parent'];
 	}
 
