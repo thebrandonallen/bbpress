@@ -1375,7 +1375,10 @@ function bbp_update_forum_last_active_id( $forum_id = 0, $active_id = 0 ) {
  * @uses bbp_get_forum_last_active_id() To get the forum's last post id
  * @uses get_post_field() To get the post_modified date of the forum
  * @uses update_post_meta() To update the forum last active meta
+ * @uses post_type_supports() To check if the them supports revisions
+ * @uses remove_post_type_support() To remove support for revisions
  * @uses wp_update_post() To update the post_modified date of the forum
+ * @uses add_post_type_support() To add support for revisions
  * @uses apply_filters() Calls 'bbp_update_forum_last_active' with the new time
  *                        and forum id
  * @return bool True on success, false on failure
@@ -1394,12 +1397,25 @@ function bbp_update_forum_last_active_time( $forum_id = 0, $new_time = '' ) {
 		// Update forum's meta - not used since 2.6
 		update_post_meta( $forum_id, '_bbp_last_active_time', $new_time );
 
+		// Toggle revisions to avoid duplicates
+		$revisions_removed = false;
+		if ( post_type_supports( bbp_get_forum_post_type(), 'revisions' ) ) {
+			$revisions_removed = true;
+			remove_post_type_support( bbp_get_forum_post_type(), 'revisions' );
+		}
+
 		// Update forum's post_modified date - since 2.6
 		wp_update_post( array(
 			'ID'                => $forum_id,
 			'post_modified'     => $new_time,
 			'post_modified_gmt' => get_gmt_from_date( $new_time )
 		) );
+
+		// Toggle revisions back on
+		if ( true === $revisions_removed ) {
+			$revisions_removed = false;
+			add_post_type_support( bbp_get_forum_post_type(), 'revisions' );
+		}
 	}
 
 	return (int) apply_filters( 'bbp_update_forum_last_active', $new_time, $forum_id );
