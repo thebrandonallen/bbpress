@@ -2570,7 +2570,7 @@ function bbp_update_topic_last_active_id( $topic_id = 0, $active_id = 0 ) {
  * @uses post_type_supports() To check if the them supports revisions
  * @uses remove_post_type_support() To remove support for revisions
  * @uses wp_update_post() To update the post_modified date of the topic
- * @uses remove_post_type_support() To add support for revisions
+ * @uses add_post_type_support() To add support for revisions
  * @uses apply_filters() Calls 'bbp_update_topic_last_active' with the new time
  *                        and topic id
  * @return bool True on success, false on failure
