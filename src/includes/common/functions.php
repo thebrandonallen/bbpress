@@ -462,8 +462,11 @@ function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 		return $data;
 	}
 
-	// Get the true last edited time from post meta
+	// Get the true last edited time from post meta, bail otherwise
 	$edit_time = get_post_meta( $post_id, '_bbp_last_edit_time_gmt', true );
+	if ( empty( $edit_time ) ) {
+		return $data;
+	}
 
 	// Reset post_modified and post_modified_gmt back to their original values
 	$data['post_date']         = get_date_from_gmt( $edit_time );
