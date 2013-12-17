@@ -402,6 +402,11 @@ function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
 		return $data;
 	}
 
+	// We're importing, return
+	if ( ( !empty( $_POST['action'] ) && ( 'bbconverter_process' == $_POST['action'] ) ) ) {
+		return $data;
+	}
+
 	// Post is not a forum or topic, return
 	if ( !in_array( $postarr['post_type'], array( bbp_get_forum_post_type(), bbp_get_topic_post_type() ) ) ) {
 		return $data;
@@ -450,6 +455,11 @@ function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 	// Make sure we're working with a revision of a topic or forum
 	if ( bbp_is_topic( $postarr['post_parent'] ) || bbp_is_forum( $postarr['post_parent'] ) ) {
 		$post_id = $postarr['post_parent'];
+	}
+
+	// We're importing, return
+	if ( ( !empty( $_POST['action'] ) && ( 'bbconverter_process' == $_POST['action'] ) ) ) {
+		return $data;
 	}
 
 	// Get the true last edited time from post meta
