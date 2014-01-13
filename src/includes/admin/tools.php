@@ -1126,16 +1126,6 @@ function bbp_admin_repair_freshness() {
 			WHERE `reply`.`meta_id` IS NULL AND `topic`.`post_type` = '{$tpt}' );" ) ) ) {
 		return array( 9, sprintf( $statement, $result ) );
 
-	// Give topics their last edit time
-	/*
-	if ( is_wp_error( $wpdb->query( "INSERT INTO `$wpdb->postmeta` (`post_id`, `meta_key`, `meta_value`)
-			( SELECT `topic`.`ID`, '_bbp_last_edit_time_gmt', `topic`.`post_modified_gmt`
-			FROM `$wpdb->posts` AS `topic`
-			WHERE `topic`.`post_type` = '" . bbp_get_topic_post_type() . "'
-			GROUP BY `topic`.`ID` );" ) ) )
-		return array( 10, sprintf( $statement, $result ) );
-	*/
-
 	// Also, update the post_modified and post_modified_gmt times
 	if ( is_wp_error( $wpdb->query( "UPDATE `$wpdb->posts`,
 			( SELECT `topic`.`ID` AS `ID`, MAX( `reply`.`post_date` ) AS `post_date`, MAX( `reply`.`post_date_gmt` ) AS `post_date_gmt`

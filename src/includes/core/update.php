@@ -283,6 +283,32 @@ function bbp_version_updater() {
 		// No changes
 	}
 
+	/** 2.6 Branch ************************************************************/
+
+	// 2.6
+	if ( $raw_db_version < 260 ) {
+		global $wpdb;
+
+		// Give forums their last edit time
+		$wpdb->query( "INSERT INTO `$wpdb->postmeta` (`post_id`, `meta_key`, `meta_value`)
+			( SELECT `forum`.`ID`, '_bbp_last_edit_time_gmt', `forum`.`post_modified_gmt`
+			FROM `$wpdb->posts` AS `forum`
+			WHERE `forum`.`post_type` = '" . bbp_get_forum_post_type() . "'
+			GROUP BY `forum`.`ID` );" ) ) )
+		);
+
+		// Give topics their last edit time
+		$wpdb->query( "INSERT INTO `$wpdb->postmeta` (`post_id`, `meta_key`, `meta_value`)
+			( SELECT `topic`.`ID`, '_bbp_last_edit_time_gmt', `topic`.`post_modified_gmt`
+			FROM `$wpdb->posts` AS `topic`
+			WHERE `topic`.`post_type` = '" . bbp_get_topic_post_type() . "'
+			GROUP BY `topic`.`ID` );" ) ) )
+		);
+
+		// Update Forum/Topic Freshness to use post_modified_gmt
+		bbp_admin_repair_freshness();
+	}
+
 	/** All done! *************************************************************/
 
 	// Bump the version
