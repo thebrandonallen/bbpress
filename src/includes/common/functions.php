@@ -414,14 +414,14 @@ function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
 
 	// Are we editing?
 	if ( bbp_is_post_request() && in_array( $_POST['action'], array( 'bbp-edit-forum', 'bbp-edit-topic', 'editpost' ) ) ) {
-
+		
 		// Set the last edited time in post meta to the new post_modified_gmt
 		update_post_meta( $postarr['ID'], '_bbp_last_edit_time_gmt', $data['post_modified_gmt'] );
-	}
 
-	// Reset post_modified and post_modified_gmt back to their original values
-	$data['post_modified']     = $postarr['post_modified'];
-	$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+		// Reset post_modified and post_modified_gmt back to their original values
+		$data['post_modified']     = $postarr['post_modified'];
+		$data['post_modified_gmt'] = $postarr['post_modified_gmt'];
+	}
 
 	return $data;
 }
