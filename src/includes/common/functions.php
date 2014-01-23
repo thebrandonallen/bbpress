@@ -448,13 +448,13 @@ function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
 function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 
 	// Don't even bother. This is not a revision or we're updating
-	if ( 'revision' !== $postarr['post_type'] || !empty( $postarr['ID'] ) ) {
+	if ( 'revision' !== $data['post_type'] || !empty( $postarr['ID'] ) ) {
 		return $data;
 	}
 
 	// Make sure we're working with a revision of a topic or forum
-	if ( bbp_is_topic( $postarr['post_parent'] ) || bbp_is_forum( $postarr['post_parent'] ) ) {
-		$post_id = $postarr['post_parent'];
+	if ( bbp_is_topic( $data['post_parent'] ) || bbp_is_forum( $data['post_parent'] ) ) {
+		return $data;
 	}
 
 	// We're importing, return
@@ -463,7 +463,7 @@ function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 	}
 
 	// Get the true last edited time from post meta, bail otherwise
-	$edit_time = get_post_meta( $post_id, '_bbp_last_edit_time_gmt', true );
+	$edit_time = get_post_meta( $data['post_parent'], '_bbp_last_edit_time_gmt', true );
 	if ( empty( $edit_time ) ) {
 		return $data;
 	}
