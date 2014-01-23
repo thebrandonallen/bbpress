@@ -414,7 +414,7 @@ function bbp_fix_post_modified( $data = array(), $postarr = array() ) {
 
 	// Are we editing?
 	if ( bbp_is_post_request() && in_array( $_POST['action'], array( 'bbp-edit-forum', 'bbp-edit-topic', 'editpost' ) ) ) {
-		
+
 		// Set the last edited time in post meta to the new post_modified_gmt
 		update_post_meta( $postarr['ID'], '_bbp_last_edit_time_gmt', $data['post_modified_gmt'] );
 
