@@ -453,7 +453,7 @@ function bbp_fix_revision_times( $data = array(), $postarr = array() ) {
 	}
 
 	// Make sure we're working with a revision of a topic or forum
-	if ( bbp_is_topic( $data['post_parent'] ) || bbp_is_forum( $data['post_parent'] ) ) {
+	if ( !bbp_is_topic( $data['post_parent'] ) || !bbp_is_forum( $data['post_parent'] ) ) {
 		return $data;
 	}
 
