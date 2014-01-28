@@ -317,11 +317,17 @@ class BBP_Forums_Admin {
 		// Parent ID
 		$parent_id = ( !empty( $_POST['parent_id'] ) && is_numeric( $_POST['parent_id'] ) ) ? (int) $_POST['parent_id'] : 0;
 
+		// Prevent infinite loop clash with last_active time updating
+		remove_action( 'save_post', array( $this, 'attributes_metabox_save' ) );
+
 		// Update the forum meta bidness
 		bbp_update_forum( array(
 			'forum_id'    => $forum_id,
 			'post_parent' => (int) $parent_id
 		) );
+
+		// Add save_post hook back, just in casies
+		add_action( 'save_post', array( $this, 'attributes_metabox_save' ) );
 
 		do_action( 'bbp_forum_attributes_metabox_save', $forum_id );
 
