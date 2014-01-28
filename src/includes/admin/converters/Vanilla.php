@@ -289,16 +289,23 @@ class Vanilla extends BBP_Converter_Base {
 		);
 		$this->field_map[] = array(
 			'from_tablename' => 'Discussion',
-			'from_fieldname' => 'DateUpdated',
+			'from_fieldname' => 'DateLastComment',
 			'to_type'        => 'topic',
 			'to_fieldname'   => 'post_modified'
 		);
 		$this->field_map[] = array(
 			'from_tablename' => 'Discussion',
-			'from_fieldname' => 'DateUpdated',
+			'from_fieldname' => 'DateLastComment',
 			'to_type'        => 'topic',
 			'to_fieldname'   => 'post_modified_gmt'
 		);
+		$this->field_map[] = array(
+			'from_tablename' => 'Discussion',
+			'from_fieldname' => 'DateUpdated',
+			'to_type'        => 'topic',
+			'to_fieldname'   => '_bbp_last_edit_time_gmt'
+		);
+
 		$this->field_map[] = array(
 			'from_tablename' => 'Discussion',
 			'from_fieldname' => 'DateLastComment',

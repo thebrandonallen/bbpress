@@ -294,14 +294,14 @@ class vBulletin extends BBP_Converter_Base {
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'thread',
-			'from_fieldname'  => 'dateline',
+			'from_fieldname'  => 'lastpost',
 			'to_type'         => 'topic',
 			'to_fieldname'    => 'post_modified',
 			'callback_method' => 'callback_datetime'
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'thread',
-			'from_fieldname'  => 'dateline',
+			'from_fieldname'  => 'lastpost',
 			'to_type'         => 'topic',
 			'to_fieldname'    => 'post_modified_gmt',
 			'callback_method' => 'callback_datetime'

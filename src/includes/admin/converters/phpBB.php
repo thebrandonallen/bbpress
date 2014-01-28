@@ -295,14 +295,14 @@ class phpBB extends BBP_Converter_Base {
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'topics',
-			'from_fieldname'  => 'topic_time',
+			'from_fieldname'  => 'topic_last_post_time',
 			'to_type'         => 'topic',
 			'to_fieldname'    => 'post_modified',
 			'callback_method' => 'callback_datetime'
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'topics',
-			'from_fieldname'  => 'topic_time',
+			'from_fieldname'  => 'topic_last_post_time',
 			'to_type'         => 'topic',
 			'to_fieldname'    => 'post_modified_gmt',
 			'callback_method' => 'callback_datetime'
