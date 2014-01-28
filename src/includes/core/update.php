@@ -294,7 +294,7 @@ function bbp_version_updater() {
 			( SELECT `forum`.`ID`, '_bbp_last_edit_time_gmt', `forum`.`post_modified_gmt`
 			FROM `$wpdb->posts` AS `forum`
 			WHERE `forum`.`post_type` = '" . bbp_get_forum_post_type() . "'
-			GROUP BY `forum`.`ID` );" ) ) )
+			GROUP BY `forum`.`ID` );"
 		);
 
 		// Give topics their last edit time
@@ -302,7 +302,7 @@ function bbp_version_updater() {
 			( SELECT `topic`.`ID`, '_bbp_last_edit_time_gmt', `topic`.`post_modified_gmt`
 			FROM `$wpdb->posts` AS `topic`
 			WHERE `topic`.`post_type` = '" . bbp_get_topic_post_type() . "'
-			GROUP BY `topic`.`ID` );" ) ) )
+			GROUP BY `topic`.`ID` );"
 		);
 
 		// Update Forum/Topic Freshness to use post_modified_gmt
