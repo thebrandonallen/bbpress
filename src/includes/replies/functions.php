@@ -977,9 +977,13 @@ function bbp_update_reply_walker( $reply_id, $last_active_time = '', $forum_id =
 				bbp_update_topic_last_active_time( $ancestor, $topic_last_active_time );
 
 				// Counts
-				bbp_update_topic_voice_count       ( $ancestor );
-				bbp_update_topic_reply_count       ( $ancestor );
-				bbp_update_topic_reply_count_hidden( $ancestor );
+				bbp_update_topic_voice_count( $ancestor );
+
+				// Only update reply count if we're deleting a reply, or in the dashboard
+				if ( in_array( current_action(), array( 'bbp_deleted_reply', 'save_post' ) ) ) {
+					bbp_update_topic_reply_count(        $ancestor );
+					bbp_update_topic_reply_count_hidden( $ancestor );
+				}
 
 			// Forum meta relating to most recent topic
 			} elseif ( bbp_is_forum( $ancestor ) ) {
@@ -1003,7 +1007,10 @@ function bbp_update_reply_walker( $reply_id, $last_active_time = '', $forum_id =
 				}
 
 				// Counts
-				bbp_update_forum_reply_count( $ancestor );
+				// Only update reply count if we're deleting a reply, or in the dashboard
+				if ( in_array( current_action(), array( 'bbp_deleted_reply', 'save_post' ) ) ) {
+					bbp_update_forum_reply_count( $ancestor );
+				}
 			}
 		}
 	}

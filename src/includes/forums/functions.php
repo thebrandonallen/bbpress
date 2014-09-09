@@ -1157,6 +1157,55 @@ function bbp_bump_forum_topic_count( $forum_id = 0, $difference = 1, $update_anc
 }
 
 /**
+ * Increase the total topic count of a forum by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $forum_id Optional. Forum id.
+ * @uses bbp_get_forum_id() To get the forum id
+ * @uses bbp_bump_forum_topic_count() To bump forum topic count
+ */
+function bbp_increase_forum_topic_count( $forum_id = 0 ) {
+	if ( empty( $forum_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_topic( $forum_id ) ) {
+		$topic_id = $forum_id;
+		$forum_id = bbp_get_topic_forum_id( $topic_id );
+
+		// If this is a new, unpublished, topic, increase hidden count and bail
+		if ( 'bbp_new_topic' === current_action() && ( ! bbp_is_topic_published( $topic_id ) && ! bbp_is_topic_closed( $topic_id ) ) ) {
+			bbp_increase_forum_topic_count_hidden( $forum_id );
+			return;
+		}
+	}
+
+	bbp_bump_forum_topic_count( $forum_id );
+}
+
+/**
+ * Decrease the total topic count of a forum by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $forum_id Optional. Forum id.
+ * @uses bbp_get_forum_id() To get the forum id
+ * @uses bbp_bump_forum_topic_count() To bump forum topic count
+ */
+function bbp_decrease_forum_topic_count( $forum_id = 0 ) {
+	if ( empty( $forum_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_topic( $forum_id ) ) {
+		$forum_id = bbp_get_topic_forum_id( $forum_id );
+	}
+
+	bbp_bump_forum_topic_count( $forum_id, -1 );
+}
+
+/**
  * Bump the total hidden topic count of a forum
  *
  * @since bbPress (r3825)
@@ -1187,6 +1236,48 @@ function bbp_bump_forum_topic_count_hidden( $forum_id = 0, $difference = 1 ) {
 	update_post_meta( $forum_id, '_bbp_topic_count_hidden', $new_count );
 
 	return (int) apply_filters( 'bbp_bump_forum_topic_count_hidden', $new_count, $forum_id, $difference );
+}
+
+/**
+ * Increase the total hidden topic count of a forum by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $forum_id Optional. Forum id.
+ * @uses bbp_get_forum_id() To get the forum id
+ * @uses bbp_bump_forum_topic_count_hidden() To bump forum hidden topic count
+ */
+function bbp_increase_forum_topic_count_hidden( $forum_id = 0 ) {
+	if ( empty( $forum_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_topic( $forum_id ) ) {
+		$forum_id = bbp_get_topic_forum_id( $forum_id );
+	}
+
+	bbp_bump_forum_topic_count_hidden( $forum_id );
+}
+
+/**
+ * Decrease the total hidden topic count of a forum by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $forum_id Optional. Forum id.
+ * @uses bbp_get_forum_id() To get the forum id
+ * @uses bbp_bump_forum_topic_count_hidden() To bump forum hidden topic count
+ */
+function bbp_decrease_forum_topic_count_hidden( $forum_id = 0 ) {
+	if ( empty( $forum_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_topic( $forum_id ) ) {
+		$forum_id = bbp_get_topic_forum_id( $forum_id );
+	}
+
+	bbp_bump_forum_topic_count_hidden( $forum_id, -1 );
 }
 
 /**
@@ -1245,6 +1336,54 @@ function bbp_bump_forum_reply_count( $forum_id = 0, $difference = 1, $update_anc
 	$forum_reply_count = (int) ( $total_reply_count + $difference );
 
 	return (int) apply_filters( 'bbp_bump_forum_reply_count', $forum_reply_count, $forum_id, $difference, $update_ancestors );
+}
+
+/**
+ * Increase the total reply count of a forum by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $forum_id Optional. Forum id.
+ * @uses bbp_get_forum_id() To get the forum id
+ * @uses bbp_bump_forum_reply_count() To bump forum topic count
+ */
+function bbp_increase_forum_reply_count( $forum_id = 0 ) {
+	if ( empty( $forum_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_reply( $forum_id ) ) {
+		$reply_id = $forum_id;
+		$forum_id = bbp_get_reply_forum_id( $reply_id );
+
+		// Don't update if this is a new, unpublished, reply
+		if ( 'bbp_new_reply' === current_action() && ! bbp_is_reply_published( $reply_id ) ) {
+			return;
+		}
+	}
+
+	bbp_bump_forum_reply_count( $forum_id, 1 );
+}
+
+/**
+ * Decrease the total reply count of a forum by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $forum_id Optional. Forum id.
+ * @uses bbp_get_forum_id() To get the forum id
+ * @uses bbp_bump_forum_reply_count() To bump forum topic count
+ */
+function bbp_decrease_forum_reply_count( $forum_id = 0 ) {
+	if ( empty( $forum_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_reply( $forum_id ) ) {
+		$forum_id = bbp_get_reply_forum_id( $forum_id );
+	}
+
+	bbp_bump_forum_reply_count( $forum_id, -1 );
 }
 
 /** Forum Updaters ************************************************************/
@@ -1711,10 +1850,14 @@ function bbp_update_forum( $args = array() ) {
 	}
 
 	// Counts
-	bbp_update_forum_subforum_count    ( $r['forum_id'] );
-	bbp_update_forum_reply_count       ( $r['forum_id'] );
-	bbp_update_forum_topic_count       ( $r['forum_id'] );
-	bbp_update_forum_topic_count_hidden( $r['forum_id'] );
+	bbp_update_forum_subforum_count( $r['forum_id'] );
+
+	// Only update topic count if we're deleting a topic, or in the dashboard
+	if ( in_array( current_action(), array( 'bbp_deleted_topic', 'save_post' ) ) ) {
+		bbp_update_forum_reply_count(        $r['forum_id'] );
+		bbp_update_forum_topic_count(        $r['forum_id'] );
+		bbp_update_forum_topic_count_hidden( $r['forum_id'] );
+	}
 
 	// Update the parent forum if one was passed
 	if ( ! empty( $r['post_parent'] ) && is_numeric( $r['post_parent'] ) ) {

@@ -2363,6 +2363,57 @@ function bbp_bump_topic_reply_count( $topic_id = 0, $difference = 1 ) {
 }
 
 /**
+ * Increase the total reply count of a topic by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $topic_id Optional. Forum id.
+ * @uses bbp_is_reply() To check if the passed topic id is a reply
+ * @uses bbp_get_reply_topic_id() To get the topic id
+ * @uses bbp_bump_topic_reply_count() To bump topic reply count
+ */
+function bbp_increase_topic_reply_count( $topic_id = 0 ) {
+	if ( empty( $topic_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_reply( $topic_id ) ) {
+		$reply_id = $topic_id;
+		$topic_id = bbp_get_reply_topic_id( $reply_id );
+
+		// If this is a new, unpublished, reply, update hidden count and bail
+		if ( 'bbp_new_reply' === current_action() && ! bbp_is_reply_published( $reply_id ) ) {
+			bbp_increase_topic_reply_count_hidden( $topic_id );
+			return;
+		}
+	}
+
+	bbp_bump_topic_reply_count( $topic_id );
+}
+
+/**
+ * Decrease the total reply count of a topic by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $topic_id Optional. Topic id.
+ * @uses bbp_is_reply() To check if the passed topic id is a reply
+ * @uses bbp_get_reply_topic_id() To get the topic id
+ * @uses bbp_bump_topic_reply_count() To bump topic reply count
+ */
+function bbp_decrease_topic_reply_count( $topic_id = 0 ) {
+	if ( empty( $topic_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_reply( $topic_id ) ) {
+		$topic_id = bbp_get_reply_topic_id( $topic_id );
+	}
+
+	bbp_bump_topic_reply_count( $topic_id, -1 );
+}
+
+/**
  * Bump the total hidden reply count of a topic
  *
  * @since bbPress (r3825)
@@ -2393,6 +2444,50 @@ function bbp_bump_topic_reply_count_hidden( $topic_id = 0, $difference = 1 ) {
 	update_post_meta( $topic_id, '_bbp_reply_count_hidden', $new_count );
 
 	return (int) apply_filters( 'bbp_bump_topic_reply_count_hidden', $new_count, $topic_id, $difference );
+}
+
+/**
+ * Increase the total hidden reply count of a topic by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $topic_id Optional. Topic id.
+ * @uses bbp_is_reply() To check if the passed topic id is a reply
+ * @uses bbp_get_reply_topic_id() To get the topic id
+ * @uses bbp_bump_topic_reply_count_hidden() To bump topic hidden reply count
+ */
+function bbp_increase_topic_reply_count_hidden( $topic_id = 0 ) {
+	if ( empty( $topic_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_reply( $topic_id ) ) {
+		$topic_id = bbp_get_reply_topic_id( $topic_id );
+	}
+
+	bbp_bump_topic_reply_count_hidden( $topic_id );
+}
+
+/**
+ * Decrease the total hidden reply count of a topic by one
+ *
+ * @since bbPress ()
+ *
+ * @param int $topic_id Optional. Topic id.
+ * @uses bbp_is_reply() To check if the passed topic id is a reply
+ * @uses bbp_get_reply_topic_id() To get the topic id
+ * @uses bbp_bump_topic_reply_count_hidden() To bump topic hidden reply count
+ */
+function bbp_decrease_topic_reply_count_hidden( $topic_id = 0 ) {
+	if ( empty( $topic_id ) ) {
+		return;
+	}
+
+	if ( bbp_is_reply( $topic_id ) ) {
+		$topic_id = bbp_get_reply_topic_id( $topic_id );
+	}
+
+	bbp_bump_topic_reply_count_hidden( $topic_id, -1 );
 }
 
 /** Topic Updaters ************************************************************/
