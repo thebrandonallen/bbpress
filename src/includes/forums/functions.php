@@ -1392,7 +1392,7 @@ function bbp_update_forum_last_active_time( $forum_id = 0, $new_time = '' ) {
 	}
 
 	// Update only if there is a time
-	if ( !empty( $new_time ) ) {
+	if ( ! empty( $new_time ) ) {
 
 		// Update forum's meta - not used since 2.6
 		update_post_meta( $forum_id, '_bbp_last_active_time', $new_time );

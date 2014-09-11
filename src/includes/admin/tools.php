@@ -1125,6 +1125,7 @@ function bbp_admin_repair_freshness() {
 			ON `topic`.`ID` = `reply`.`post_id` AND `reply`.`meta_key` = '_bbp_last_active_time'
 			WHERE `reply`.`meta_id` IS NULL AND `topic`.`post_type` = '{$tpt}' );" ) ) ) {
 		return array( 9, sprintf( $statement, $result ) );
+	}
 
 	// Also, update the post_modified and post_modified_gmt times
 	if ( is_wp_error( $wpdb->query( "UPDATE `$wpdb->posts`,
@@ -1134,12 +1135,13 @@ function bbp_admin_repair_freshness() {
 			WHERE `reply`.`post_status` = '{$pps}' AND `topic`.`post_type` = '{$tpt}' AND `reply`.`post_type` = '{$rpt}'
 			GROUP BY `topic`.`ID` ) AS `update`
 			SET `$wpdb->posts`.`post_modified` = `update`.`post_date`, `$wpdb->posts`.`post_modified_gmt` = `update`.`post_date_gmt`
-			WHERE `$wpdb->posts`.`ID` = `update`.`ID`;" ) ) )
+			WHERE `$wpdb->posts`.`ID` = `update`.`ID`;" ) ) ) {
 		return array( 10, sprintf( $statement, $result ) );
+	}
 
 	// Forums need to know what their last active item is as well. Now it gets a bit more complex to do in the database.
 	$forums = $wpdb->get_col( "SELECT `ID` FROM `$wpdb->posts` WHERE `post_type` = '{$fpt}' and `post_status` != 'auto-draft';" );
-	if ( is_wp_error( $forums ) )
+	if ( is_wp_error( $forums ) ) {
 		return array( 11, sprintf( $statement, $result ) );
 	}
 
