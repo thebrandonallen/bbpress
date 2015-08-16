@@ -288,7 +288,6 @@ add_action( 'bbp_spammed_reply',    'bbp_increase_topic_reply_count_hidden' );
 add_action( 'bbp_unspammed_reply',  'bbp_increase_topic_reply_count'        );
 add_action( 'bbp_unspammed_reply',  'bbp_decrease_topic_reply_count_hidden' );
 add_action( 'bbp_approved_reply',   'bbp_increase_topic_reply_count'        );
-add_action( 'bbp_approved_reply',   'bbp_decrease_forum_reply_count_hidden' );
 add_action( 'bbp_unapproved_reply', 'bbp_decrease_forum_reply_count'        );
 add_action( 'bbp_unapproved_reply', 'bbp_increase_topic_reply_count_hidden' );
 
