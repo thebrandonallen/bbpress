@@ -277,6 +277,10 @@ add_action( 'bbp_unapproved_reply', 'bbp_decrease_forum_reply_count'        );
 add_action( 'bbp_unapproved_topic', 'bbp_decrease_forum_topic_count'        );
 add_action( 'bbp_unapproved_topic', 'bbp_increase_forum_topic_count_hidden' );
 
+// Update forum reply counts for approved/unapproved topics.
+add_action( 'bbp_approved_topic',   'bbp_approved_unapproved_topic_update_forum_reply_count' );
+add_action( 'bbp_unapproved_topic', 'bbp_approved_unapproved_topic_update_forum_reply_count' );
+
 // Update topic reply counts
 add_action( 'bbp_new_reply',        'bbp_increase_topic_reply_count'        );
 add_action( 'bbp_trashed_reply',    'bbp_decrease_topic_reply_count'        );

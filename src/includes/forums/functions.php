@@ -1395,6 +1395,40 @@ function bbp_decrease_forum_reply_count( $forum_id = 0 ) {
 	bbp_bump_forum_reply_count( $forum_id, -1 );
 }
 
+/**
+ * Update forum reply counts when a topic is approved or unapproved.
+ *
+ * @since 2.6.0 bbPress ()
+ *
+ * @param int $topic_id
+ *
+ * @uses bbp_get_reply_post_type() To get the reply post type.
+ * @uses bbp_get_public_child_ids() To get the topic's public child ids.
+ * @uses bbp_get_topic_forum_id() To get the topic's forum id.
+ * @uses bbp_bump_forum_reply_count() To bump the forum reply count.
+ *
+ * @return void
+ */
+function bbp_approved_unapproved_topic_update_forum_reply_count( $topic_id = 0 ) {
+
+	// Bail early if we don't have a topic id.
+	if ( empty( $topic_id ) ) {
+		return;
+	}
+
+	// Get the topic's replies.
+	$replies = bbp_get_public_child_ids( $topic_id, bbp_get_reply_post_type() );
+	$count = count( $replies );
+
+	// If we're unapproving, set count to negative.
+	if ( 'bbp_unapproved_topic' === current_filter() ) {
+		$count = -$count;
+	}
+
+	// Update counts.
+	bbp_bump_forum_reply_count( bbp_get_topic_forum_id( $topic_id ), $count );
+}
+
 /** Forum Updaters ************************************************************/
 
 /**
