@@ -1031,7 +1031,15 @@ function bbp_update_topic_walker( $topic_id, $last_active_time = '', $forum_id =
  * @uses update_post_meta() To update the old forum sticky meta
  * @uses bbp_stick_topic() To stick the topic in the new forum
  * @uses bbp_get_reply_post_type() To get the reply post type
- * @uses bbp_get_all_child_ids() To get the public child ids
+ * @uses bbp_get_all_child_ids() To get the all child ids.
+ * @uses bbp_get_public_child_ids() To get the all child ids.
+ * @uses get_post_field() To get the topic's post status.
+ * @uses bbp_get_public_status_id() To get the public status id.
+ * @uses bbp_decrease_forum_topic_count() To bump the forum topic count by -1.
+ * @uses bbp_bump_forum_reply_count() To bump the forum reply count.
+ * @uses bbp_increase_forum_topic_count() To bump the forum topic count by 1.
+ * @uses bbp_decrease_forum_topic_count_hidden() To bump the forum topic hidden count by -1.
+ * @uses bbp_increase_forum_topic_count_hidden() To bump the forum topic hidden count by 1.
  * @uses bbp_update_reply_forum_id() To update the reply forum id
  * @uses bbp_update_topic_forum_id() To update the topic forum id
  * @uses get_post_ancestors() To get the topic's ancestors
@@ -1108,6 +1116,31 @@ function bbp_move_topic_handler( $topic_id, $old_forum_id, $new_forum_id ) {
 
 	// Get topic ancestors
 	$old_forum_ancestors = array_values( array_unique( array_merge( array( $old_forum_id ), (array) get_post_ancestors( $old_forum_id ) ) ) );
+
+	// Get reply count.
+	$public_reply_count = count( bbp_get_public_child_ids( $topic_id, bbp_get_reply_post_type() ) );
+
+	// Topic status.
+	$topic_status = get_post_field( 'post_status', $topic_id );
+
+	// Update old/new forum counts.
+	if ( $topic_status === bbp_get_public_status_id() ) {
+
+		// Update old forum counts.
+		bbp_decrease_forum_topic_count( $old_forum_id );
+		bbp_bump_forum_reply_count( $old_forum_id, -$public_reply_count );
+
+		// Update new forum counts.
+		bbp_increase_forum_topic_count( $new_forum_id );
+		bbp_bump_forum_reply_count( $new_forum_id, $public_reply_count );
+	} else {
+
+		// Update old forum counts.
+		bbp_decrease_forum_topic_count_hidden( $old_forum_id );
+
+		// Update new forum counts.
+		bbp_increase_forum_topic_count_hidden( $new_forum_id );
+	}
 
 	// Loop through ancestors and update them
 	if ( ! empty( $old_forum_ancestors ) ) {
