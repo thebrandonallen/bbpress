@@ -308,6 +308,10 @@ add_action( 'bbp_trash_reply',   'bbp_decrease_user_reply_count' );
 add_action( 'bbp_spam_topic',    'bbp_decrease_user_topic_count' );
 add_action( 'bbp_spam_reply',    'bbp_decrease_user_reply_count' );
 
+// Insert forum/topic/reply counts
+add_action( 'bbp_insert_topic', 'bbp_insert_topic_update_counts', 10, 2 );
+add_action( 'bbp_insert_reply', 'bbp_insert_reply_update_counts', 10, 3 );
+
 // Topic status transition helpers for replies
 add_action( 'bbp_trash_topic',   'bbp_trash_topic_replies'   );
 add_action( 'bbp_untrash_topic', 'bbp_untrash_topic_replies' );

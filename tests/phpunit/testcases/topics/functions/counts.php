@@ -13,6 +13,8 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 	 * Generic function to test the topics counts with a new reply
 	 */
 	public function test_bbp_topic_new_reply_counts() {
+		remove_action( 'bbp_insert_reply', 'bbp_insert_reply_update_counts', 10 );
+
 		$f = $this->factory->forum->create();
 		$t = $this->factory->topic->create( array(
 			'post_parent' => $f,
@@ -75,6 +77,8 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_topic_voice_count( $t, true );
 		$this->assertSame( 2, $count );
+
+		add_action( 'bbp_insert_reply', 'bbp_insert_reply_update_counts', 10, 2 );
 	}
 
 	/**

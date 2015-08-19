@@ -13,6 +13,8 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 	 * Generic function to test the forum counts with a new topic
 	 */
 	public function test_bbp_forum_new_topic_counts() {
+		remove_action( 'bbp_insert_topic', 'bbp_insert_topic_update_counts', 10 );
+
 		$f = $this->factory->forum->create();
 		$t1 = $this->factory->topic->create( array(
 			'post_parent' => $f,
@@ -60,6 +62,8 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_forum_topic_count_hidden( $f, true, true );
 		$this->assertSame( 0, $count );
+
+		remove_action( 'bbp_insert_topic', 'bbp_insert_topic_update_counts', 10, 2 );
 	}
 
 	/**

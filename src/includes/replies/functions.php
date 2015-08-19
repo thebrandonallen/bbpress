@@ -80,6 +80,40 @@ function bbp_insert_reply( $reply_data = array(), $reply_meta = array() ) {
 	return $reply_id;
 }
 
+/**
+ * Update counts after a reply is inserted via `bbp_insert_reply`.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int $reply_id
+ * @param int $topic_id
+ * @param int $forum_id
+ *
+ * @uses get_post_field() To get the post status.
+ * @uses bbp_get_public_status_id() To get the public status id.
+ * @uses bbp_increase_topic_reply_count() To bump the reply's topic reply count by 1.
+ * @uses bbp_increase_forum_reply_count() To bump the reply's forum reply count by 1.
+ * @uses bbp_increase_topic_reply_count_hidden() To bump the reply's topic reply
+ *                                               hidden count by 1.
+ *
+ * @return void
+ */
+function bbp_insert_reply_update_counts( $reply_id = 0, $topic_id = 0, $forum_id = 0 ) {
+
+	// Get the reply status.
+	$status = get_post_field( 'post_status', $reply_id );
+
+	// If the reply is public, update the forum/topic reply counts.
+	if ( $status === bbp_get_public_status_id() ) {
+		bbp_increase_topic_reply_count( $topic_id );
+		bbp_increase_forum_reply_count( $forum_id );
+
+	// If the reply isn't public only update the topic reply hidden count.
+	} else {
+		bbp_increase_topic_reply_count_hidden( $topic_id );
+	}
+}
+
 /** Post Form Handlers ********************************************************/
 
 /**

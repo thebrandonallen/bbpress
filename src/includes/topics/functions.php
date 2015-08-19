@@ -2500,6 +2500,37 @@ function bbp_decrease_topic_reply_count_hidden( $topic_id = 0 ) {
 	bbp_bump_topic_reply_count_hidden( $topic_id, -1 );
 }
 
+/**
+ * Update counts after a topic is inserted via `bbp_insert_topic`.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int $reply_id
+ * @param int $topic_id
+ *
+ * @uses get_post_field() To get the post status.
+ * @uses bbp_get_public_status_id() To get the public status id.
+ * @uses bbp_increase_forum_topic_count() To bump the topic's forum topic count by 1.
+ * @uses bbp_increase_forum_topic_count_hidden() To bump the topic's forum topic
+ *                                               hidden count by 1.
+ *
+ * @return void
+ */
+function bbp_insert_topic_update_counts( $topic_id = 0, $forum_id = 0 ) {
+
+	// Get the topic status.
+	$status = get_post_field( 'post_status', $topic_id );
+
+	// If the topic is public, update the forum topic counts.
+	if ( $status === bbp_get_public_status_id() ) {
+		bbp_increase_forum_topic_count( $forum_id );
+
+	// If the topic isn't public only update the forum topic hidden count.
+	} else {
+		bbp_increase_forum_topic_count_hidden( $forum_id );
+	}
+}
+
 /** Topic Updaters ************************************************************/
 
 /**
