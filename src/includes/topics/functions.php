@@ -2406,25 +2406,31 @@ function bbp_bump_topic_reply_count( $topic_id = 0, $difference = 1 ) {
 }
 
 /**
- * Increase the total reply count of a topic by one
+ * Increase the total reply count of a topic by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $topic_id Optional. Forum id.
- * @uses bbp_is_reply() To check if the passed topic id is a reply
- * @uses bbp_get_reply_topic_id() To get the topic id
- * @uses bbp_bump_topic_reply_count() To bump topic reply count
+ *
+ * @uses bbp_is_reply() To check if the passed topic id is a reply.
+ * @uses bbp_get_reply_topic_id() To get the topic id.
+ * @uses bbp_bump_topic_reply_count() To bump topic reply count.
+ *
+ * @return void
  */
 function bbp_increase_topic_reply_count( $topic_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $topic_id ) ) {
 		return;
 	}
 
+	// If it's a reply, get the topic id.
 	if ( bbp_is_reply( $topic_id ) ) {
 		$reply_id = $topic_id;
 		$topic_id = bbp_get_reply_topic_id( $reply_id );
 
-		// If this is a new, unpublished, reply, update hidden count and bail
+		// If this is a new, unpublished, reply, update hidden count and bail.
 		if ( 'bbp_new_reply' === current_action() && ! bbp_is_reply_published( $reply_id ) ) {
 			bbp_increase_topic_reply_count_hidden( $topic_id );
 			return;
@@ -2435,20 +2441,26 @@ function bbp_increase_topic_reply_count( $topic_id = 0 ) {
 }
 
 /**
- * Decrease the total reply count of a topic by one
+ * Decrease the total reply count of a topic by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $topic_id Optional. Topic id.
- * @uses bbp_is_reply() To check if the passed topic id is a reply
- * @uses bbp_get_reply_topic_id() To get the topic id
- * @uses bbp_bump_topic_reply_count() To bump topic reply count
+ *
+ * @uses bbp_is_reply() To check if the passed topic id is a reply.
+ * @uses bbp_get_reply_topic_id() To get the topic id.
+ * @uses bbp_bump_topic_reply_count() To bump topic reply count.
+ *
+ * @return void
  */
 function bbp_decrease_topic_reply_count( $topic_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $topic_id ) ) {
 		return;
 	}
 
+	// If it's a reply, get the topic id.
 	if ( bbp_is_reply( $topic_id ) ) {
 		$topic_id = bbp_get_reply_topic_id( $topic_id );
 	}
@@ -2490,20 +2502,26 @@ function bbp_bump_topic_reply_count_hidden( $topic_id = 0, $difference = 1 ) {
 }
 
 /**
- * Increase the total hidden reply count of a topic by one
+ * Increase the total hidden reply count of a topic by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $topic_id Optional. Topic id.
- * @uses bbp_is_reply() To check if the passed topic id is a reply
- * @uses bbp_get_reply_topic_id() To get the topic id
- * @uses bbp_bump_topic_reply_count_hidden() To bump topic hidden reply count
+ *
+ * @uses bbp_is_reply() To check if the passed topic id is a reply.
+ * @uses bbp_get_reply_topic_id() To get the topic id.
+ * @uses bbp_bump_topic_reply_count_hidden() To bump topic hidden reply count.
+ *
+ * @return void
  */
 function bbp_increase_topic_reply_count_hidden( $topic_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $topic_id ) ) {
 		return;
 	}
 
+	// If it's a reply, get the topic id.
 	if ( bbp_is_reply( $topic_id ) ) {
 		$topic_id = bbp_get_reply_topic_id( $topic_id );
 	}
@@ -2512,20 +2530,26 @@ function bbp_increase_topic_reply_count_hidden( $topic_id = 0 ) {
 }
 
 /**
- * Decrease the total hidden reply count of a topic by one
+ * Decrease the total hidden reply count of a topic by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $topic_id Optional. Topic id.
- * @uses bbp_is_reply() To check if the passed topic id is a reply
- * @uses bbp_get_reply_topic_id() To get the topic id
- * @uses bbp_bump_topic_reply_count_hidden() To bump topic hidden reply count
+ *
+ * @uses bbp_is_reply() To check if the passed topic id is a reply.
+ * @uses bbp_get_reply_topic_id() To get the topic id.
+ * @uses bbp_bump_topic_reply_count_hidden() To bump topic hidden reply count.
+ *
+ * @return void
  */
 function bbp_decrease_topic_reply_count_hidden( $topic_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $topic_id ) ) {
 		return;
 	}
 
+	// If it's a reply, get the topic id.
 	if ( bbp_is_reply( $topic_id ) ) {
 		$topic_id = bbp_get_reply_topic_id( $topic_id );
 	}

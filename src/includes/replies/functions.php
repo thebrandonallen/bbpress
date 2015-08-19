@@ -1024,7 +1024,7 @@ function bbp_update_reply_walker( $reply_id, $last_active_time = '', $forum_id =
 				// Counts
 				bbp_update_topic_voice_count( $ancestor );
 
-				// Only update reply count if we're deleting a reply, or in the dashboard
+				// Only update reply count if we're deleting a reply, or in the dashboard.
 				if ( in_array( current_action(), array( 'bbp_deleted_reply', 'save_post' ) ) ) {
 					bbp_update_topic_reply_count(        $ancestor );
 					bbp_update_topic_reply_count_hidden( $ancestor );
@@ -1052,7 +1052,7 @@ function bbp_update_reply_walker( $reply_id, $last_active_time = '', $forum_id =
 				}
 
 				// Counts
-				// Only update reply count if we're deleting a reply, or in the dashboard
+				// Only update reply count if we're deleting a reply, or in the dashboard.
 				if ( in_array( current_action(), array( 'bbp_deleted_reply', 'save_post' ) ) ) {
 					bbp_update_forum_reply_count( $ancestor );
 				}

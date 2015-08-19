@@ -74,7 +74,7 @@ function bbp_insert_forum( $forum_data = array(), $forum_meta = array() ) {
 	) );
 
 	/**
-	 * Fires after reply has been inserted via `bbp_insert_forum`.
+	 * Fires after forum has been inserted via `bbp_insert_forum`.
 	 *
 	 * @since 2.6.0 bbPress (rXXXX)
 	 *
@@ -1166,24 +1166,30 @@ function bbp_bump_forum_topic_count( $forum_id = 0, $difference = 1, $update_anc
 }
 
 /**
- * Increase the total topic count of a forum by one
+ * Increase the total topic count of a forum by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $forum_id Optional. Forum id.
- * @uses bbp_get_forum_id() To get the forum id
- * @uses bbp_bump_forum_topic_count() To bump forum topic count
+ *
+ * @uses bbp_get_forum_id() To get the forum id.
+ * @uses bbp_bump_forum_topic_count() To bump forum topic count.
+ *
+ * @return void
  */
 function bbp_increase_forum_topic_count( $forum_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $forum_id ) ) {
 		return;
 	}
 
+	// If it's a topic, get the forum id.
 	if ( bbp_is_topic( $forum_id ) ) {
 		$topic_id = $forum_id;
 		$forum_id = bbp_get_topic_forum_id( $topic_id );
 
-		// If this is a new, unpublished, topic, increase hidden count and bail
+		// If this is a new, unpublished, topic, increase hidden count and bail.
 		if ( 'bbp_new_topic' === current_action() && ( ! bbp_is_topic_published( $topic_id ) && ! bbp_is_topic_closed( $topic_id ) ) ) {
 			bbp_increase_forum_topic_count_hidden( $forum_id );
 			return;
@@ -1194,19 +1200,24 @@ function bbp_increase_forum_topic_count( $forum_id = 0 ) {
 }
 
 /**
- * Decrease the total topic count of a forum by one
+ * Decrease the total topic count of a forum by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $forum_id Optional. Forum id.
- * @uses bbp_get_forum_id() To get the forum id
- * @uses bbp_bump_forum_topic_count() To bump forum topic count
+ * @uses bbp_get_forum_id() To get the forum id.
+ * @uses bbp_bump_forum_topic_count() To bump forum topic count.
+ *
+ * @return void
  */
 function bbp_decrease_forum_topic_count( $forum_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $forum_id ) ) {
 		return;
 	}
 
+	// If it's a topic, get the forum id.
 	if ( bbp_is_topic( $forum_id ) ) {
 		$forum_id = bbp_get_topic_forum_id( $forum_id );
 	}
@@ -1248,19 +1259,25 @@ function bbp_bump_forum_topic_count_hidden( $forum_id = 0, $difference = 1 ) {
 }
 
 /**
- * Increase the total hidden topic count of a forum by one
+ * Increase the total hidden topic count of a forum by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $forum_id Optional. Forum id.
- * @uses bbp_get_forum_id() To get the forum id
- * @uses bbp_bump_forum_topic_count_hidden() To bump forum hidden topic count
+ *
+ * @uses bbp_get_forum_id() To get the forum id.
+ * @uses bbp_bump_forum_topic_count_hidden() To bump forum hidden topic count.
+ *
+ * @return void
  */
 function bbp_increase_forum_topic_count_hidden( $forum_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $forum_id ) ) {
 		return;
 	}
 
+	// If it's a topic, get the forum id.
 	if ( bbp_is_topic( $forum_id ) ) {
 		$forum_id = bbp_get_topic_forum_id( $forum_id );
 	}
@@ -1269,19 +1286,25 @@ function bbp_increase_forum_topic_count_hidden( $forum_id = 0 ) {
 }
 
 /**
- * Decrease the total hidden topic count of a forum by one
+ * Decrease the total hidden topic count of a forum by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $forum_id Optional. Forum id.
- * @uses bbp_get_forum_id() To get the forum id
- * @uses bbp_bump_forum_topic_count_hidden() To bump forum hidden topic count
+ *
+ * @uses bbp_get_forum_id() To get the forum id.
+ * @uses bbp_bump_forum_topic_count_hidden() To bump forum hidden topic count.
+ *
+ * @return void
  */
 function bbp_decrease_forum_topic_count_hidden( $forum_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $forum_id ) ) {
 		return;
 	}
 
+	// If it's a topic, get the forum id.
 	if ( bbp_is_topic( $forum_id ) ) {
 		$forum_id = bbp_get_topic_forum_id( $forum_id );
 	}
@@ -1348,19 +1371,25 @@ function bbp_bump_forum_reply_count( $forum_id = 0, $difference = 1, $update_anc
 }
 
 /**
- * Increase the total reply count of a forum by one
+ * Increase the total reply count of a forum by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $forum_id Optional. Forum id.
- * @uses bbp_get_forum_id() To get the forum id
- * @uses bbp_bump_forum_reply_count() To bump forum topic count
+ *
+ * @uses bbp_get_forum_id() To get the forum id.
+ * @uses bbp_bump_forum_reply_count() To bump forum topic count.
+ *
+ * @return void
  */
 function bbp_increase_forum_reply_count( $forum_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $forum_id ) ) {
 		return;
 	}
 
+	// If it's a reply, get the forum id.
 	if ( bbp_is_reply( $forum_id ) ) {
 		$reply_id = $forum_id;
 		$forum_id = bbp_get_reply_forum_id( $reply_id );
@@ -1375,19 +1404,25 @@ function bbp_increase_forum_reply_count( $forum_id = 0 ) {
 }
 
 /**
- * Decrease the total reply count of a forum by one
+ * Decrease the total reply count of a forum by one.
  *
- * @since bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $forum_id Optional. Forum id.
- * @uses bbp_get_forum_id() To get the forum id
- * @uses bbp_bump_forum_reply_count() To bump forum topic count
+ *
+ * @uses bbp_get_forum_id() To get the forum id.
+ * @uses bbp_bump_forum_reply_count() To bump forum topic count.
+ *
+ * @return void
  */
 function bbp_decrease_forum_reply_count( $forum_id = 0 ) {
+
+	// Bail early if no id is passed.
 	if ( empty( $forum_id ) ) {
 		return;
 	}
 
+	// If it's a reply, get the forum id.
 	if ( bbp_is_reply( $forum_id ) ) {
 		$forum_id = bbp_get_reply_forum_id( $forum_id );
 	}
@@ -1398,7 +1433,7 @@ function bbp_decrease_forum_reply_count( $forum_id = 0 ) {
 /**
  * Update forum reply counts when a topic is approved or unapproved.
  *
- * @since 2.6.0 bbPress ()
+ * @since 2.6.0 bbPress (rXXXX)
  *
  * @param int $topic_id
  *
