@@ -73,6 +73,15 @@ function bbp_insert_forum( $forum_data = array(), $forum_meta = array() ) {
 		'forum_id' => $forum_id,
 	) );
 
+	/**
+	 * Fires after reply has been inserted via `bbp_insert_forum`.
+	 *
+	 * @since 2.6.0 bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_insert_forum', (int) $forum_id );
+
 	// Return new forum ID
 	return $forum_id;
 }

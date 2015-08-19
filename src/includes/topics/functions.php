@@ -70,6 +70,16 @@ function bbp_insert_topic( $topic_data = array(), $topic_meta = array() ) {
 	// Update the topic and hierarchy
 	bbp_update_topic( $topic_id, $topic_meta['forum_id'], array(), $topic_data['post_author'], false );
 
+	/**
+	 * Fires after topic has been inserted via `bbp_insert_topic`.
+	 *
+	 * @since 2.6.0 bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_insert_topic', (int) $topic_id, (int) $topic_meta['forum_id'] );
+
 	// Return new topic ID
 	return $topic_id;
 }

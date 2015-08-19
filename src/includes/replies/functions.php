@@ -65,6 +65,17 @@ function bbp_insert_reply( $reply_data = array(), $reply_meta = array() ) {
 	// Update the reply and hierarchy
 	bbp_update_reply( $reply_id, $reply_meta['topic_id'], $reply_meta['forum_id'], array(), $reply_data['post_author'], false, $reply_meta['reply_to'] );
 
+	/**
+	 * Fires after reply has been inserted via `bbp_insert_reply`.
+	 *
+	 * @since 2.6.0 bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 * @param int $topic_id The topic id.
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_insert_reply', (int) $reply_id, (int) $reply_meta['topic_id'], (int) $reply_meta['forum_id'] );
+
 	// Return new reply ID
 	return $reply_id;
 }
