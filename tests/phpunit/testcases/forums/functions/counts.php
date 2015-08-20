@@ -257,6 +257,47 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 		$this->assertSame( '1', $count );
 	}
 
+ 	/**
+	 * @covers ::bbp_increase_forum_topic_count
+	 */
+	public function test_bbp_increase_forum_topic_count() {
+		$f = $this->factory->forum->create();
+
+		$count = bbp_get_forum_topic_count( $f );
+		$this->assertSame( '0', $count );
+
+		bbp_increase_forum_topic_count( $f );
+
+		$count = bbp_get_forum_topic_count( $f );
+		$this->assertSame( '1', $count );
+	}
+
+	/**
+	 * @covers ::bbp_decrease_forum_topic_count
+	 */
+	public function test_bbp_decrease_forum_topic_count() {
+		$f = $this->factory->forum->create();
+
+		$count = bbp_get_forum_topic_count( $f );
+		$this->assertSame( '0', $count );
+
+		$t = $this->factory->topic->create_many( 9, array(
+			'post_parent' => $f,
+		) );
+
+		bbp_update_forum_topic_count( $f );
+
+		$count = bbp_get_forum_topic_count( $f );
+		$this->assertSame( '9', $count );
+
+		bbp_update_forum_topic_count( $f );
+
+		bbp_decrease_forum_topic_count( $f );
+
+		$count = bbp_get_forum_topic_count( $f );
+		$this->assertSame( '8', $count );
+	}
+
 	/**
 	 * @covers ::bbp_bump_forum_topic_count_hidden
 	 */
@@ -272,6 +313,50 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 		$this->assertSame( '1', $count );
 	}
 
+ 	/**
+	 * @covers ::bbp_increase_forum_topic_count_hidden
+	 */
+	public function test_bbp_increase_forum_topic_count_hidden() {
+		$f = $this->factory->forum->create();
+
+		$count = bbp_get_forum_topic_count_hidden( $f );
+		$this->assertSame( '0', $count );
+
+		bbp_increase_forum_topic_count_hidden( $f );
+
+		$count = bbp_get_forum_topic_count_hidden( $f );
+		$this->assertSame( '1', $count );
+	}
+
+	/**
+	 * @covers ::bbp_decrease_forum_topic_count_hidden
+	 */
+	public function test_bbp_decrease_forum_topic_count_hidden() {
+		$f = $this->factory->forum->create();
+
+		$count = bbp_get_forum_topic_count_hidden( $f );
+		$this->assertSame( '0', $count );
+
+		$t = $this->factory->topic->create_many( 9, array(
+			'post_parent' => $f,
+			'post_status' => bbp_get_spam_status_id(),
+			'topic_meta' => array(
+				'forum_id' => $f,
+				'spam_meta_status' => 'publish',
+			)
+		) );
+
+		bbp_update_forum_topic_count_hidden( $f );
+
+		$count = bbp_get_forum_topic_count_hidden( $f );
+		$this->assertSame( '9', $count );
+
+		bbp_decrease_forum_topic_count_hidden( $f );
+
+		$count = bbp_get_forum_topic_count_hidden( $f );
+		$this->assertSame( '8', $count );
+	}
+
 	/**
 	 * @covers ::bbp_bump_forum_reply_count
 	 */
@@ -285,6 +370,49 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_forum_reply_count( $f );
 		$this->assertSame( '1', $count );
+	}
+
+ 	/**
+	 * @covers ::bbp_increase_forum_reply_count
+	 */
+	public function test_bbp_increase_forum_reply_count() {
+		$f = $this->factory->forum->create();
+
+		$count = bbp_get_forum_reply_count( $f );
+		$this->assertSame( '0', $count );
+
+		bbp_increase_forum_reply_count( $f );
+
+		$count = bbp_get_forum_reply_count( $f );
+		$this->assertSame( '1', $count );
+	}
+
+	/**
+	 * @covers ::bbp_decrease_forum_reply_count
+	 */
+	public function test_bbp_decrease_forum_reply_count() {
+		$f = $this->factory->forum->create();
+
+		$count = bbp_get_forum_reply_count( $f );
+		$this->assertSame( '0', $count );
+
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+		) );
+
+		$r = $this->factory->reply->create_many( 9, array(
+			'post_parent' => $t,
+		) );
+
+		bbp_update_forum_reply_count( $f );
+
+		$count = bbp_get_forum_reply_count( $f );
+		$this->assertSame( '9', $count );
+
+		bbp_decrease_forum_reply_count( $f );
+
+		$count = bbp_get_forum_reply_count( $f );
+		$this->assertSame( '8', $count );
 	}
 
 	/**
