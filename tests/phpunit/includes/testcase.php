@@ -3,6 +3,7 @@
 class BBP_UnitTestCase extends WP_UnitTestCase {
 
 	protected static $cached_SERVER_NAME = null;
+	protected static $bbp_hooks_saved = array();
 
 	/**
 	 * Fake WP mail globals, to avoid errors
@@ -28,6 +29,10 @@ class BBP_UnitTestCase extends WP_UnitTestCase {
 			}
 		}
 
+		if ( ! self::$bbp_hooks_saved ) {
+			$this->_bbp_maybe_backup_hooks();
+		}
+
 		$this->factory = new BBP_UnitTest_Factory;
 
 		if ( class_exists( 'BP_UnitTest_Factory' ) ) {
@@ -49,6 +54,61 @@ class BBP_UnitTestCase extends WP_UnitTestCase {
 					wpmu_delete_blog( $blog['blog_id'], true );
 				}
 			}
+		}
+
+		$this->_bbp_maybe_restore_hooks();
+	}
+
+	/**
+	 * Saves the action and filter-related globals so they can be restored later
+	 *
+	 * Stores $merged_filters, $wp_actions, $wp_current_filter, and $wp_filter
+	 * on a class variable so they can be restored on tearDown() using _restore_hooks()
+	 *
+	 * This is a backport from the WP_UnitTestCase in WP 4.0+, so that we can
+	 * get tests to pass in 3.9 and below. Some tests were failing for no other
+	 * reason than the below globals were a mess.
+	 *
+	 * @global array $merged_filters
+	 * @global array $wp_actions
+	 * @global array $wp_current_filter
+	 * @global array $wp_filter
+	 * @return void
+	 */
+	protected function _bbp_maybe_backup_hooks() {
+		if ( version_compare( $GLOBALS['wp_version'], '3.9', '>' ) ) {
+			return;
+		}
+
+		$globals = array( 'merged_filters', 'wp_actions', 'wp_current_filter', 'wp_filter' );
+		foreach ( $globals as $key ) {
+			self::$bbp_hooks_saved[ $key ] = $GLOBALS[ $key ];
+		}
+	}
+
+	/**
+	 * Restores the hook-related globals to their state at setUp()
+	 *
+	 * so that future tests aren't affected by hooks set during this last test
+	 *
+	 * This is a backport from the WP_UnitTestCase in WP 4.0+, so that we can
+	 * get tests to pass in 3.9 and below. Some tests were failing for no other
+	 * reason than the below globals were a mess.
+	 *
+	 * @global array $merged_filters
+	 * @global array $wp_actions
+	 * @global array $wp_current_filter
+	 * @global array $wp_filter
+	 * @return void
+	 */
+	protected function _bbp_maybe_restore_hooks(){
+		if ( version_compare( $GLOBALS['wp_version'], '3.9', '>' ) ) {
+			return;
+		}
+
+		$globals = array( 'merged_filters', 'wp_actions', 'wp_current_filter', 'wp_filter' );
+		foreach ( $globals as $key ) {
+			$GLOBALS[ $key ] = self::$bbp_hooks_saved[ $key ];
 		}
 	}
 
