@@ -76,7 +76,7 @@ class BBP_UnitTestCase extends WP_UnitTestCase {
 	 * @return void
 	 */
 	protected function _bbp_maybe_backup_hooks() {
-		if ( version_compare( $GLOBALS['wp_version'], '3.9', '>' ) ) {
+		if ( version_compare( $GLOBALS['wp_version'], '4.0', '<' ) ) {
 			return;
 		}
 
@@ -102,7 +102,7 @@ class BBP_UnitTestCase extends WP_UnitTestCase {
 	 * @return void
 	 */
 	protected function _bbp_maybe_restore_hooks(){
-		if ( version_compare( $GLOBALS['wp_version'], '3.9', '>' ) ) {
+		if ( version_compare( $GLOBALS['wp_version'], '4.0', '<' ) ) {
 			return;
 		}
 
