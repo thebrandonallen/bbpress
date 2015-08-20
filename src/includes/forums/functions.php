@@ -1190,7 +1190,7 @@ function bbp_increase_forum_topic_count( $forum_id = 0 ) {
 		$forum_id = bbp_get_topic_forum_id( $topic_id );
 
 		// If this is a new, unpublished, topic, increase hidden count and bail.
-		if ( 'bbp_new_topic' === current_action() && ( ! bbp_is_topic_published( $topic_id ) && ! bbp_is_topic_closed( $topic_id ) ) ) {
+		if ( 'bbp_new_topic' === current_filter() && ( ! bbp_is_topic_published( $topic_id ) && ! bbp_is_topic_closed( $topic_id ) ) ) {
 			bbp_increase_forum_topic_count_hidden( $forum_id );
 			return;
 		}
@@ -1394,13 +1394,13 @@ function bbp_increase_forum_reply_count( $forum_id = 0 ) {
 		$reply_id = $forum_id;
 		$forum_id = bbp_get_reply_forum_id( $reply_id );
 
-		// Don't update if this is a new, unpublished, reply
-		if ( 'bbp_new_reply' === current_action() && ! bbp_is_reply_published( $reply_id ) ) {
+		// Don't update if this is a new, unpublished, reply.
+		if ( 'bbp_new_reply' === current_filter() && ! bbp_is_reply_published( $reply_id ) ) {
 			return;
 		}
 	}
 
-	bbp_bump_forum_reply_count( $forum_id, 1 );
+	bbp_bump_forum_reply_count( $forum_id );
 }
 
 /**
@@ -1930,8 +1930,8 @@ function bbp_update_forum( $args = array() ) {
 	// Counts
 	bbp_update_forum_subforum_count( $r['forum_id'] );
 
-	// Only update topic count if we're deleting a topic, or in the dashboard
-	if ( in_array( current_action(), array( 'bbp_deleted_topic', 'save_post' ) ) ) {
+	// Only update topic count if we're deleting a topic, or in the dashboard.
+	if ( in_array( current_filter(), array( 'bbp_deleted_topic', 'save_post' ) ) ) {
 		bbp_update_forum_reply_count(        $r['forum_id'] );
 		bbp_update_forum_topic_count(        $r['forum_id'] );
 		bbp_update_forum_topic_count_hidden( $r['forum_id'] );

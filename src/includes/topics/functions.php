@@ -2431,7 +2431,7 @@ function bbp_increase_topic_reply_count( $topic_id = 0 ) {
 		$topic_id = bbp_get_reply_topic_id( $reply_id );
 
 		// If this is a new, unpublished, reply, update hidden count and bail.
-		if ( 'bbp_new_reply' === current_action() && ! bbp_is_reply_published( $reply_id ) ) {
+		if ( 'bbp_new_reply' === current_filter() && ! bbp_is_reply_published( $reply_id ) ) {
 			bbp_increase_topic_reply_count_hidden( $topic_id );
 			return;
 		}
