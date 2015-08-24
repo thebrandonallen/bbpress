@@ -104,7 +104,7 @@ class BBP_Tests_Extend_BuddyPress_Groups_Subscriptions extends BBP_UnitTestCase 
 		bbp_add_user_forum_subscription( $u2, $f );
 		bbp_add_user_topic_subscription( $u2, $t );
 
-		add_filter( 'bbp_before_group_unsubscribe_parse_args', function() {
+		add_filter( 'bbp_before_group_unsubscribe_parse_args', create_function( '', "
 			return array(
 				'leave' => array(
 					'hidden'  => true,
@@ -121,8 +121,8 @@ class BBP_Tests_Extend_BuddyPress_Groups_Subscriptions extends BBP_UnitTestCase 
 					'private' => true,
 					'public'  => true,
 				),
-			);
-		} );
+			);"
+		) );
 
 		$this->group_extension->leave_group_unsubscribe( $this->group_id, $u2 );
 
@@ -187,7 +187,7 @@ class BBP_Tests_Extend_BuddyPress_Groups_Subscriptions extends BBP_UnitTestCase 
 		bbp_add_user_forum_subscription( $u2, $f );
 		bbp_add_user_topic_subscription( $u2, $t );
 
-		add_filter( 'bbp_before_group_unsubscribe_parse_args', function() {
+		add_filter( 'bbp_before_group_unsubscribe_parse_args', create_function( '', "
 			return array(
 				'leave' => array(
 					'hidden'  => true,
@@ -204,8 +204,8 @@ class BBP_Tests_Extend_BuddyPress_Groups_Subscriptions extends BBP_UnitTestCase 
 					'private' => true,
 					'public'  => true,
 				),
-			);
-		} );
+			);"
+		) );
 
 		$this->group_extension->leave_group_unsubscribe( $this->group_id, $u2 );
 
@@ -271,7 +271,7 @@ class BBP_Tests_Extend_BuddyPress_Groups_Subscriptions extends BBP_UnitTestCase 
 		bbp_add_user_forum_subscription( $u2, $f );
 		bbp_add_user_topic_subscription( $u2, $t );
 
-		add_filter( 'bbp_before_group_unsubscribe_parse_args', function() {
+		add_filter( 'bbp_before_group_unsubscribe_parse_args', create_function( '', "
 			return array(
 				'leave' => array(
 					'hidden'  => false,
@@ -288,8 +288,8 @@ class BBP_Tests_Extend_BuddyPress_Groups_Subscriptions extends BBP_UnitTestCase 
 					'private' => true,
 					'public'  => true,
 				),
-			);
-		} );
+			);"
+		) );
 
 		$this->group_extension->leave_group_unsubscribe( $g, $u2 );
 
