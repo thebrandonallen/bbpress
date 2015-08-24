@@ -1523,21 +1523,21 @@ class BBP_Forums_Group_Extension extends BP_Group_Extension {
 	 * @since x.x.x bbPress (rXXXX)
 	 *
 	 * @param int $group_id ID of the group.
-	 * @param int $user_id  The user whose subscriptions need to be deleted.
+	 * @param int $user_id  The user whose subscriptions/favorites need to be deleted.
 	 *
-	 * @uses current_filter()
-	 * @uses bp_current_action()
-	 * @uses bbp_parse_args()
-	 * @uses groups_get_group()
-	 * @uses bbp_get_group_forum_ids()
-	 * @uses bbp_get_user_subscribed_forum_ids()
-	 * @uses bbp_get_user_subscribed_topic_ids()
-	 * @uses bbp_get_user_favorites_topic_ids()
-	 * @uses bbp_remove_user_forum_subscription()
-	 * @uses bbp_get_topic_post_type()
-	 * @uses bbp_get_all_child_ids()
-	 * @uses bbp_remove_user_topic_subscription()
-	 * @uses bbp_remove_user_favorite()
+	 * @uses current_filter() To get the current action.
+	 * @uses bp_current_action() To get the current BP action.
+	 * @uses bbp_parse_args() Parse unfavorite/unsubscribe arguments.
+	 * @uses groups_get_group() To get the group.
+	 * @uses bbp_get_group_forum_ids() To get the group forum ids.
+	 * @uses bbp_get_user_subscribed_forum_ids() To get the user's subscribed forum ids.
+	 * @uses bbp_get_user_subscribed_topic_ids() To get the user's subscribed topic ids.
+	 * @uses bbp_get_user_favorites_topic_ids() To get the user's favorited topic ids.
+	 * @uses bbp_remove_user_forum_subscription() To remove the user's forum subscription.
+	 * @uses bbp_get_topic_post_type() To get the topic post type.
+	 * @uses bbp_get_all_child_ids() To get the forum's child ids.
+	 * @uses bbp_remove_user_topic_subscription() To remove the user's topic subscription.
+	 * @uses bbp_remove_user_favorite() To remove the user's topic favorite.
 	 *
 	 * @return bool True if any have been deleted.
 	 */
