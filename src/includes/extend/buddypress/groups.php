@@ -99,6 +99,15 @@ class BBP_Forums_Group_Extension extends BP_Group_Extension {
 
 		// Adds a hidden input value to the "Group Settings" page
 		add_action( 'bp_before_group_settings_admin', array( $this, 'group_settings_hidden_field'     ) );
+
+		// When a user is banned from a group, remove forum/topic subscriptions and favorites.
+		add_action( 'groups_ban_member',              array( $this, 'leave_group_unsubscribe' ), 10, 2  );
+
+		// When a user is removed from a group, remove forum/topic subscriptions and favorites.
+		add_action( 'groups_remove_member',           array( $this, 'leave_group_unsubscribe' ), 10, 2  );
+
+		// When a user leaves a group, remove forum/topic subscriptions and favorites.
+		add_action( 'groups_leave_group',             array( $this, 'leave_group_unsubscribe' ), 10, 2  );
 	}
 
 	/**
@@ -1505,5 +1514,151 @@ class BBP_Forums_Group_Extension extends BP_Group_Extension {
 
 		return $args;
 	}
+
+	/** Subscriptions/Favorites ***********************************************/
+
+	/**
+	 * Unsubscribe user from all forums and topics when leaving a group
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $group_id ID of the group.
+	 * @param int $user_id  The user whose subscriptions need to be deleted.
+	 *
+	 * @uses current_filter()
+	 * @uses bp_current_action()
+	 * @uses bbp_parse_args()
+	 * @uses groups_get_group()
+	 * @uses bbp_get_group_forum_ids()
+	 * @uses bbp_get_user_subscribed_forum_ids()
+	 * @uses bbp_get_user_subscribed_topic_ids()
+	 * @uses bbp_get_user_favorites_topic_ids()
+	 * @uses bbp_remove_user_forum_subscription()
+	 * @uses bbp_get_topic_post_type()
+	 * @uses bbp_get_all_child_ids()
+	 * @uses bbp_remove_user_topic_subscription()
+	 * @uses bbp_remove_user_favorite()
+	 *
+	 * @return bool True if any have been deleted.
+	 */
+	public function leave_group_unsubscribe( $group_id = 0, $user_id = 0 ) {
+
+		// We need both ids to be successful.
+		if ( empty( $group_id ) || empty( $user_id ) ) {
+			return false;
+		}
+
+		// Get the current filter for later use.
+		$current_filter = current_filter();
+
+		// Bail early if the user is leaving, not removing. Wait for round two.
+		// See #BP6597.
+		if ( 'groups_remove_member' === $current_filter && 'leave-group' === bp_current_action() ) {
+			return false;
+		}
+
+		// Is a user leaving, being removed, or getting banned.
+		if ( 'groups_remove_member' === $current_filter ) {
+			$action = 'remove';
+		} elseif ( 'groups_ban_member' === $current_filter ) {
+			$action = 'ban';
+		} else {
+			$action = 'leave';
+		}
+
+		// Set return value. Default to false.
+		$retval = false;
+
+		// By default, everything is unfavorited and unsubscribed when someone leaves,
+		// gets banned from, or removed from a group. All arguments are required, and
+		// are expected to have a value of true or false.
+		$defaults = array(
+			'leave' => array(
+				'hidden'  => true,
+				'private' => true,
+				'public'  => true,
+			),
+			'remove' => array(
+				'hidden'  => true,
+				'private' => true,
+				'public'  => true,
+			),
+			'ban' => array(
+				'hidden'  => true,
+				'private' => true,
+				'public'  => true,
+			),
+		);
+
+		// Parse our arguments. See `bbp_parse_args()` for filters.
+		$args = bbp_parse_args( array(), $defaults, 'group_unsubscribe'  );
+
+		// Get the group statuses we should update.
+		$statuses = array_keys( $args[ $action ], true, true );
+
+		// What is the group status?
+		$group_status = groups_get_group( array( 'group_id' => $group_id  ) )->status;
+
+		// If the group status isn't a status we should act upon, bail.
+		if ( ! in_array( $group_status, $statuses ) ) {
+			return false;
+		}
+
+		// Get the forum associated with the group. If there's none, bail.
+		$forum_ids = bbp_get_group_forum_ids( $group_id );
+		if ( empty( $forum_ids ) ) {
+			return false;
+		}
+
+		// Get the user's forum and topic subcriptions.
+		$forum_subscriptions = bbp_get_user_subscribed_forum_ids( $user_id );
+		$topic_subscriptions = bbp_get_user_subscribed_topic_ids( $user_id );
+
+		// Get the user's topic favorites.
+		$topic_favorites = bbp_get_user_favorites_topic_ids( $user_id );
+
+		// If no subscriptions, bail.
+		if ( empty( $forum_subscriptions ) && empty( $topic_subscriptions ) && empty( $topic_favorites ) ) {
+			return false;
+		}
+
+		// Loop over all of the forums to get all the topics.
+		foreach ( $forum_ids as $forum_id ) {
+
+			// Maybe unsubscribe forum.
+			if ( in_array( $forum_id, $forum_subscriptions ) ) {
+					bbp_remove_user_forum_subscription( $user_id, $forum_id );
+					$retval = true;
+			}
+
+			// Get the forum's topics.
+			$topics = bbp_get_all_child_ids( $forum_id, bbp_get_topic_post_type() );
+
+			// Get the intersection of child topics and the user's topic subscriptions.
+			$group_topics_subscribed = array_intersect( $topics, $topic_subscriptions );
+
+			// Maybe unsubscribe topics.
+			if ( ! empty( $group_topics_subscribed ) ) {
+				foreach ( $group_topics_subscribed as $topic_id ) {
+					bbp_remove_user_topic_subscription( $user_id, $topic_id );
+					$retval = true;
+				}
+			}
+
+			// Get the intersetion of child topics and the user's topic favorites.
+			$group_topics_favorited = array_intersect( $topics, $topic_favorites );
+
+			// Maybe unfavorite topics.
+			if ( ! empty( $group_topics_favorited ) ) {
+				foreach( $group_topics_favorited as $topic_id ) {
+					bbp_remove_user_favorite( $user_id, $topic_id );
+					$retval = true;
+				}
+			}
+		}
+
+		return $retval;
+	}
+
 }
 endif;
