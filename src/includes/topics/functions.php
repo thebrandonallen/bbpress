@@ -2640,7 +2640,7 @@ function bbp_maybe_bump_topic_voice_count( $topic_id = 0, $reply_id = 0, $action
 	}
 
 	// Bail if we don't have a valid action.
-	if ( ! in_array( $action, array( 'increase', 'decrease' ) ) ) {
+	if ( ! in_array( $action, array( 'increase', 'decrease' ), true ) ) {
 		return false;
 	}
 
