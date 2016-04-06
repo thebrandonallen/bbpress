@@ -319,7 +319,7 @@ add_action( 'bbp_delete_topic',  'bbp_delete_topic_replies'  );
 add_action( 'bbp_spam_topic',    'bbp_spam_topic_replies'    );
 add_action( 'bbp_unspam_topic',  'bbp_unspam_topic_replies'  );
 
-// Voice counts
+// Voice counts.
 add_action( 'bbp_new_reply',        'bbp_maybe_increase_topic_voice_count' );
 add_action( 'bbp_new_topic',        'bbp_maybe_increase_topic_voice_count' );
 add_action( 'bbp_approved_reply',   'bbp_maybe_increase_topic_voice_count' );

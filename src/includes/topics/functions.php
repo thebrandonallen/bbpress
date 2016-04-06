@@ -2708,8 +2708,8 @@ function bbp_maybe_bump_topic_voice_count( $topic_id = 0, $reply_id = 0, $action
  *
  * @since 2.6.0 bbPress (rXXXX)
  *
- * @param int $topic_id The reply id.
- * @param int $reply_id The topic id.
+ * @param int $topic_id The topic id.
+ * @param int $reply_id The reply id.
  *
  * @uses bbp_is_reply() To determine if passed topic id is actually a reply.
  * @uses bbp_get_reply_id() To validate the reply id.
