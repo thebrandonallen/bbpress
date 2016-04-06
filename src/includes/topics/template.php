@@ -2354,6 +2354,70 @@ function bbp_topic_voice_count( $topic_id = 0, $integer = false ) {
 	}
 
 /**
+ * Return an array of topic voice ids.
+ *
+ * All `post_author` ids of public replies, along with public and closed topics
+ * are included in this array. Authors of anonymous topics are counted as one
+ * voice. Anonymous replies are not included. Voice ids are stored in the
+ * post_meta table as a comma-separated list, and converted to an array before
+ * being returned.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int $topic_id The topic id. Required.
+ *
+ * @uses bbp_get_topic_id() To validate the topic id.
+ * @uses get_post_meta() To get the `_bbp_voice_ids` meta value.
+ * @uses bbp_db() To get the wpdb object.
+ * @uses bbp_get_public_status_id() To get the public status id.
+ * @uses bbp_get_reply_post_type() To get the reply post type.
+ * @uses bbp_get_topic_post_type() To get the topic post type.
+ *
+ * @return bool|array An array of voice ids. False on failure.
+ */
+function bbp_get_topic_voice_ids( $topic_id = 0 ) {
+
+	// Validate the topic id.
+	$topic_id = bbp_get_topic_id( $topic_id );
+
+	// Bail if the topic id isn't valid.
+	if ( empty( $topic_id ) ) {
+		return false;
+	}
+
+	// Check the post meta table first.
+	$voice_ids = get_post_meta( $topic_id, '_bbp_voice_ids', true );
+
+	// If no voice ids, get them from the db.
+	if ( false === $voice_ids ) {
+		// Query the DB to get voices in this topic.
+		$bbp_db = bbp_db();
+		$query  = $bbp_db->prepare( "SELECT post_author FROM {$bbp_db->posts} WHERE ( post_parent = %d AND post_status = '%s' AND post_type = '%s' AND post_author != 0 ) OR ( ID = %d AND post_type = '%s' );", $topic_id, bbp_get_public_status_id(), bbp_get_reply_post_type(), $topic_id, bbp_get_topic_post_type() );
+		$voice_ids = $bbp_db->get_col( $query );
+	}
+
+	// Make sure we have an array.
+	if ( ! is_array( $voice_ids ) ) {
+		$voice_ids = explode( ',', $voice_ids );
+	}
+
+	// Clean up the voice ids array. We don't want empty strings converted to an
+	// integer of 0, so we need to filter these out.
+	$voice_ids = array_filter( array_map( 'trim', $voice_ids ), 'strlen' );
+	$voice_ids = array_map( 'absint', $voice_ids );
+
+	/**
+	 * Filters the voice ids array for a topic.
+	 *
+	 * @since 2.6.0 bbPress (rXXXX)
+	 *
+	 * @param array $voice_ids Array of voice ids.
+	 * @param int   $topic_id  The topic id.
+	 */
+	return (array) apply_filters( 'bbp_get_topic_voice_ids', $voice_ids, $topic_id );
+}
+
+/**
  * Output a the tags of a topic
  *
  * @since 2.0.0 bbPress (r2688)

@@ -557,6 +557,9 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 		$count = bbp_update_topic_voice_count( $t );
 		$this->assertSame( 2, $count );
 
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0] ), $voices );
+
 		$r = $this->factory->reply->create( array(
 			'post_author' => $u[1],
 			'post_parent' => $t,
@@ -565,6 +568,9 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 		bbp_update_topic_voice_count( $t );
 		$count = bbp_get_topic_voice_count( $t );
 		$this->assertSame( '3', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1] ), $voices );
 	}
 
 	/**
@@ -576,5 +582,194 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 		$this->markTestIncomplete(
 			'This test has not been implemented yet.'
 		);
+	}
+
+	/**
+	 * @covers ::bbp_maybe_bump_topic_voice_count
+	 */
+	public function test_bbp_maybe_bump_topic_voice_count() {
+		$u = $this->factory->user->create_many( 2 );
+		$t = $this->factory->topic->create();
+
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '1', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id() ), $voices );
+
+		remove_action( 'bbp_insert_reply', 'bbp_maybe_increase_topic_voice_count' );
+
+		$r1 = $this->factory->reply->create( array(
+			'post_author' => $u[0],
+			'post_parent' => $t,
+		) );
+
+		bbp_maybe_bump_topic_voice_count( $t, $r1, 'increase' );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '2', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0] ), $voices );
+
+		$r2 = $this->factory->reply->create( array(
+			'post_author' => $u[1],
+			'post_parent' => $t,
+		) );
+
+		bbp_maybe_bump_topic_voice_count( $t, $r2, 'increase' );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '3', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1] ), $voices );
+
+		$r3 = $this->factory->reply->create( array(
+			'post_author' => $u[1],
+			'post_parent' => $t,
+		) );
+
+		bbp_maybe_bump_topic_voice_count( $t, $r3, 'increase' );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '3', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1], $u[1] ), $voices );
+
+		remove_action( 'bbp_unapproved_reply', 'bbp_maybe_decrease_topic_voice_count' );
+
+		bbp_unapprove_reply( $r1 );
+
+		add_action( 'bbp_unapproved_reply', 'bbp_maybe_decrease_topic_voice_count' );
+
+		bbp_maybe_bump_topic_voice_count( $t, $r1, 'decrease' );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '2', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[1], $u[1] ), $voices );
+
+		add_action( 'bbp_insert_reply', 'bbp_maybe_increase_topic_voice_count' );
+	}
+
+	/**
+	 * @covers ::bbp_maybe_increase_topic_voice_count
+	 */
+	public function test_bbp_maybe_increase_topic_voice_count() {
+		$u = $this->factory->user->create_many( 2 );
+		$t = $this->factory->topic->create();
+
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '1', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id() ), $voices );
+
+		remove_action( 'bbp_insert_reply', 'bbp_maybe_increase_topic_voice_count' );
+
+		$r = $this->factory->reply->create( array(
+			'post_author' => $u[0],
+			'post_parent' => $t,
+		) );
+
+		bbp_maybe_increase_topic_voice_count( $t, $r );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '2', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0] ), $voices );
+
+		$r = $this->factory->reply->create( array(
+			'post_author' => $u[1],
+			'post_parent' => $t,
+		) );
+
+		bbp_maybe_increase_topic_voice_count( $r );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '3', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1] ), $voices );
+
+		add_action( 'bbp_insert_reply', 'bbp_maybe_increase_topic_voice_count' );
+	}
+
+	/**
+	 * @covers ::bbp_maybe_decrease_topic_voice_count
+	 */
+	public function test_bbp_maybe_decrease_topic_voice_count() {
+		$u = $this->factory->user->create_many( 2 );
+		$t = $this->factory->topic->create();
+
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '1', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id() ), $voices );
+
+		$r1 = $this->factory->reply->create( array(
+			'post_author' => $u[0],
+			'post_parent' => $t,
+		) );
+		$r2 = $this->factory->reply->create( array(
+			'post_author' => $u[1],
+			'post_parent' => $t,
+		) );
+		$r3 = $this->factory->reply->create( array(
+			'post_author' => $u[1],
+			'post_parent' => $t,
+		) );
+
+		remove_action( 'bbp_unapproved_reply', 'bbp_maybe_decrease_topic_voice_count' );
+
+		bbp_unapprove_reply( $r3 );
+
+		add_action( 'bbp_unapproved_reply', 'bbp_maybe_decrease_topic_voice_count' );
+
+		bbp_maybe_decrease_topic_voice_count( $t, $r3 );
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '3', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1] ), $voices );
+
+		bbp_unapprove_reply( $r1 );
+
+		$count = bbp_get_topic_voice_count( $t );
+		$this->assertSame( '2', $count );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[1] ), $voices );
+	}
+
+	/**
+	 * @covers ::bbp_get_topic_voice_ids
+	 */
+	public function test_bbp_get_topic_voice_ids() {
+		$u = $this->factory->user->create_many( 2 );
+		$t = $this->factory->topic->create();
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id() ), $voices );
+
+		$r1 = $this->factory->reply->create( array(
+			'post_author' => $u[0],
+			'post_parent' => $t,
+		) );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0] ), $voices );
+
+		$r2 = $this->factory->reply->create_many( 2, array(
+			'post_author' => $u[1],
+			'post_parent' => $t,
+		) );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1], $u[1] ), $voices );
+
+		bbp_unapprove_reply( $r2[0] );
+
+		$voices = bbp_get_topic_voice_ids( $t );
+		$this->assertEquals( array( bbp_get_current_user_id(), $u[0], $u[1] ), $voices );
 	}
 }

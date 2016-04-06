@@ -1026,7 +1026,8 @@ function bbp_admin_repair_topic_voice_count() {
 	$statement = __( 'Counting the number of voices in each topic&hellip; %s', 'bbpress' );
 	$result    = __( 'Failed!', 'bbpress' );
 
-	$sql_delete = "DELETE FROM `{$bbp_db->postmeta}` WHERE `meta_key` = '_bbp_voice_count';";
+	// Delete our old counts and ids.
+	$sql_delete = "DELETE FROM `{$bbp_db->postmeta}` WHERE `meta_key` IN ( '_bbp_voice_count', '_bbp_voice_ids' );";
 	if ( is_wp_error( $bbp_db->query( $sql_delete ) ) ) {
 		return array( 1, sprintf( $statement, $result ) );
 	}
@@ -1037,19 +1038,48 @@ function bbp_admin_repair_topic_voice_count() {
 	$pps = bbp_get_public_status_id();
 	$cps = bbp_get_closed_status_id();
 
-	$sql = "INSERT INTO `{$bbp_db->postmeta}` (`post_id`, `meta_key`, `meta_value`) (
-			SELECT `postmeta`.`meta_value`, '_bbp_voice_count', COUNT(DISTINCT `post_author`) as `meta_value`
-				FROM `{$bbp_db->posts}` AS `posts`
-				LEFT JOIN `{$bbp_db->postmeta}` AS `postmeta`
-					ON `posts`.`ID` = `postmeta`.`post_id`
-					AND `postmeta`.`meta_key` = '_bbp_topic_id'
-				WHERE `posts`.`post_type` IN ( '{$tpt}', '{$rpt}' )
-					AND `posts`.`post_status` IN ( '{$pps}', '{$cps}' )
-					AND `posts`.`post_author` != '0'
-				GROUP BY `postmeta`.`meta_value`);";
+	$sql = "SELECT `postmeta`.`meta_value` AS `id`, COUNT(DISTINCT `post_author`) AS `count`, GROUP_CONCAT( `post_author` ) AS `voices`
+			FROM `{$bbp_db->posts}` AS `posts`
+			LEFT JOIN `{$bbp_db->postmeta}` AS `postmeta`
+				ON `posts`.`ID` = `postmeta`.`post_id`
+				AND `postmeta`.`meta_key` = '_bbp_topic_id'
+			WHERE ( `posts`.`post_type` = '{$tpt}' AND `posts`.`post_status` IN ( '{$pps}', '{$cps}' ) )
+				OR ( `posts`.`post_type` = '{$rpt}' AND `posts`.`post_status` = '{$pps}' AND `posts`.`post_author` != '0' )
+			GROUP BY `postmeta`.`meta_value`;";
+
+	// Get our counts and voice ids.
+	$results = $bbp_db->get_results( $sql );
+
+	if ( is_wp_error( $results ) ) {
+		return array( 2, sprintf( $statement, $result ) );
+	}
+
+	// Set up our MySQL VALUES groups.
+	$values = array();
+	foreach ( $results as $key => $result ) {
+
+		// If we don't have a valid post id, bail.
+		if ( empty( $result->id ) ) {
+			// Unset results item to manage memory.
+			unset( $results[ $key ] );
+			continue;
+		}
+
+		$values[] = "( {$result->id}, '_bbp_voice_count', '{$result->count}' )";
+		$values[] = "( {$result->id}, '_bbp_voice_ids', '{$result->voices}' )";
+
+		// Unset results item to manage memory.
+		unset( $results[ $key ] );
+	}
+
+	// Insert our meta roles.
+	$sql = "INSERT INTO `{$bbp_db->postmeta}` (`post_id`, `meta_key`, `meta_value`) VALUES " . implode( ',', $values ) . ";";
+
+	// Unset values array to manage memory. Probably not needed, but can't hurt.
+	unset( $values );
 
 	if ( is_wp_error( $bbp_db->query( $sql ) ) ) {
-		return array( 2, sprintf( $statement, $result ) );
+		return array( 3, sprintf( $statement, $result ) );
 	}
 
 	return array( 0, sprintf( $statement, __( 'Complete!', 'bbpress' ) ) );

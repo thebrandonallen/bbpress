@@ -2606,6 +2606,176 @@ function bbp_insert_topic_update_counts( $topic_id = 0, $forum_id = 0 ) {
 	}
 }
 
+/**
+ * Maybe bump the topic voice count.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int    $topic_id The reply id.
+ * @param int    $reply_id The topic id.
+ * @param string $action Expected `increase` or `decrease`.
+ *
+ * @uses bbp_get_topic_id() To validate the topic id.
+ * @uses bbp_get_reply_id() To validate the reply id.
+ * @uses bbp_get_reply_topic_id() To get the reply's topic id.
+ * @uses get_post_field() To get `the post_author` field.
+ * @uses bbp_is_reply_published() To determine if the reply is published.
+ * @uses bbp_is_topic_published() To determine if the topic is published.
+ * @uses bbp_get_topic_voice_ids() To get the topic voice ids array.
+ * @uses update_post_meta() To update our voice count/ids meta values.
+ * @uses apply_filters() To update our voice count/ids meta values.
+ *
+ * @return bool|int The topic voice count. False on failure.
+ */
+function bbp_maybe_bump_topic_voice_count( $topic_id = 0, $reply_id = 0, $action = '' ) {
+
+	// Valid our topic/reply ids.
+	$topic_id = bbp_get_topic_id( $topic_id );
+	$reply_id = bbp_get_reply_id( $reply_id );
+
+	// Bail early if we don't have valid ids.
+	if ( empty( $topic_id ) && empty( $reply_id ) ) {
+		return false;
+	}
+
+	// Bail if we don't have a valid action.
+	if ( ! in_array( $action, array( 'increase', 'decrease' ) ) ) {
+		return false;
+	}
+
+	// Make sure we have a topic id.
+	if ( empty( $topic_id ) ) {
+		$topic_id = bbp_get_reply_topic_id( $reply_id );
+	}
+
+	// Set some defaults.
+	$published = $anonymous = false;
+	$author    = 0;
+
+	// Possibly update our author and published variables.
+	if ( ! empty( $reply_id ) ) {
+		$author    = (int) get_post_field( 'post_author', $reply_id );
+		$anonymous = empty( $author );
+
+		// Don't waste a potential call to the db, if it won't be counted anyway.
+		if ( ! $anonymous ) {
+			$published = bbp_is_reply_published( $reply_id );
+		}
+	} else {
+		$author    = (int) get_post_field( 'post_author', $topic_id );
+		$published = bbp_is_topic_published( $topic_id );
+	}
+
+	// Get the topic voice ids.
+	$voice_ids = bbp_get_topic_voice_ids( $topic_id );
+
+	// If we have a valid author and we're published, update the voice ids array.
+	if ( $published && 'increase' === $action && ! $anonymous ) {
+		$voice_ids[] = $author;
+	} elseif ( ! $published && 'decrease' === $action && ! $anonymous ) {
+		unset( $voice_ids[ array_search( $author, $voice_ids ) ] );
+	}
+
+	// Count the unique voices.
+	$voice_count = count( array_unique( $voice_ids ) );
+
+	// Concentate our voice ids back to a string for the db.
+	$voice_ids = implode( ',', $voice_ids );
+
+	// Only update voice ids and count for a topic if it's not an anonymous reply.
+	if ( ! $anonymous ) {
+		update_post_meta( $topic_id, '_bbp_voice_ids', $voice_ids );
+		update_post_meta( $topic_id, '_bbp_voice_count', $voice_count );
+	}
+
+	/**
+	 * Filters the return of a voice count bump for a topic.
+	 *
+	 * @since 2.6.0 bbPress (rXXXX)
+	 *
+	 * @param int    $voice_count The topic voice count.
+	 * @param array  $voice_ids   Array of voice ids.
+	 * @param int    $topic_id    The topic id.
+	 * @param int    $reply_id    The reply id.
+	 * @param string $action      The action being taken (`increase` or `decrease`).
+	 */
+	return (int) apply_filters( 'bbp_maybe_bump_topic_voice_count', $voice_count, $voice_ids, $topic_id, $reply_id, $action );
+}
+
+/**
+ * Maybe increase the topic voice count.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int $topic_id The reply id.
+ * @param int $reply_id The topic id.
+ *
+ * @uses bbp_is_reply() To determine if passed topic id is actually a reply.
+ * @uses bbp_get_reply_id() To validate the reply id.
+ * @uses bbp_get_reply_topic_id() To get the reply's topic id.
+ * @uses bbp_is_topic() To determine if passed topic id is actually a topic.
+ * @uses bbp_get_topic_id() To validate the topic id.
+ * @uses bbp_maybe_bump_topic_voice_count() To maybe increase the topic voice count.
+ *
+ * @return bool|int The topic voice count. False on failure.
+ */
+function bbp_maybe_increase_topic_voice_count( $topic_id = 0, $reply_id = 0 ) {
+
+	// If it's a reply, then get the topic id, and validate the reply id.
+	if ( bbp_is_reply( $topic_id ) ) {
+		$reply_id = bbp_get_reply_id( $topic_id );
+		$topic_id = bbp_get_reply_topic_id( $reply_id );
+
+	// If it's a topic, then validate the passed ids.
+	} elseif ( bbp_is_topic( $topic_id ) ) {
+		$reply_id = bbp_get_reply_id( $reply_id );
+		$topic_id = bbp_get_topic_id( $topic_id );
+
+	// Bail if the passed id isn't a topic or reply.
+	} else {
+		return false;
+	}
+
+	return bbp_maybe_bump_topic_voice_count( $topic_id, $reply_id, 'increase' );
+}
+
+/**
+ * Maybe decrease the topic voice count.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int $topic_id The reply id.
+ * @param int $reply_id The topic id.
+ *
+ * @uses bbp_is_reply() To determine if passed topic id is actually a reply.
+ * @uses bbp_get_reply_id() To validate the reply id.
+ * @uses bbp_get_reply_topic_id() To get the reply's topic id.
+ * @uses bbp_is_topic() To determine if passed topic id is actually a topic.
+ * @uses bbp_get_topic_id() To validate the topic id.
+ * @uses bbp_maybe_bump_topic_voice_count() To maybe decrease the topic voice count.
+ *
+ * @return bool|int The topic voice count. False on failure.
+ */
+function bbp_maybe_decrease_topic_voice_count( $topic_id = 0, $reply_id = 0 ) {
+
+	// If it's a reply, then get the topic id, and validate the reply id.
+	if ( bbp_is_reply( $topic_id ) ) {
+		$reply_id = bbp_get_reply_id( $topic_id );
+		$topic_id = bbp_get_reply_topic_id( $reply_id );
+
+	// If it's a topic, then validate the passed ids.
+	} elseif ( bbp_is_topic( $topic_id ) ) {
+		$reply_id = bbp_get_reply_id( $reply_id );
+		$topic_id = bbp_get_topic_id( $topic_id );
+
+	// Bail if the passed id isn't a topic or reply.
+	} else {
+		return false;
+	}
+
+	return bbp_maybe_bump_topic_voice_count( $topic_id, $reply_id, 'decrease' );
+}
+
 /** Topic Updaters ************************************************************/
 
 /**
@@ -2913,13 +3083,16 @@ function bbp_update_topic_voice_count( $topic_id = 0 ) {
 
 	// Query the DB to get voices in this topic
 	$bbp_db = bbp_db();
-	$query  = $bbp_db->prepare( "SELECT COUNT( DISTINCT post_author ) FROM {$bbp_db->posts} WHERE ( post_parent = %d AND post_status = '%s' AND post_type = '%s' ) OR ( ID = %d AND post_type = '%s' );", $topic_id, bbp_get_public_status_id(), bbp_get_reply_post_type(), $topic_id, bbp_get_topic_post_type() );
-	$voices = (int) $bbp_db->get_var( $query );
+	$query  = $bbp_db->prepare( "SELECT post_author FROM {$bbp_db->posts} WHERE ( post_parent = %d AND post_status = '%s' AND post_type = '%s' AND post_author != 0 ) OR ( ID = %d AND post_type = '%s' );", $topic_id, bbp_get_public_status_id(), bbp_get_reply_post_type(), $topic_id, bbp_get_topic_post_type() );
+	$voice_ids = $bbp_db->get_col( $query );
+	$voice_ids = array_map( 'intval', (array) $voice_ids );
+	$count     = count( array_unique( $voice_ids ) );
 
-	// Update the voice count for this topic id
-	update_post_meta( $topic_id, '_bbp_voice_count', $voices );
+	// Update the voice ids and count for this topic id
+	update_post_meta( $topic_id, '_bbp_published_voice_ids', implode( ',', $voice_ids ) );
+	update_post_meta( $topic_id, '_bbp_voice_count', $count );
 
-	return (int) apply_filters( 'bbp_update_topic_voice_count', $voices, $topic_id );
+	return (int) apply_filters( 'bbp_update_topic_voice_count', $count, $topic_id );
 }
 
 /**
