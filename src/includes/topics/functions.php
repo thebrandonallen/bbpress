@@ -2654,7 +2654,7 @@ function bbp_maybe_bump_topic_voice_count( $topic_id = 0, $reply_id = 0, $action
 
 	// Possibly update our author and published variables.
 	if ( ! empty( $reply_id ) ) {
-		$author    = (int) get_post_field( 'post_author', $reply_id );
+		$author    = bbp_get_reply_author_id( $reply_id );
 		$anonymous = empty( $author );
 
 		// Don't waste a potential call to the db, if it won't be counted anyway.
@@ -2662,7 +2662,7 @@ function bbp_maybe_bump_topic_voice_count( $topic_id = 0, $reply_id = 0, $action
 			$published = bbp_is_reply_published( $reply_id );
 		}
 	} else {
-		$author    = (int) get_post_field( 'post_author', $topic_id );
+		$author    = bbp_get_topic_author_id( $topic_id );
 		$published = bbp_is_topic_published( $topic_id );
 	}
 
