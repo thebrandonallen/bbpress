@@ -2673,7 +2673,7 @@ function bbp_maybe_bump_topic_voice_count( $topic_id = 0, $reply_id = 0, $action
 	if ( $published && 'increase' === $action && ! $anonymous ) {
 		$voice_ids[] = $author;
 	} elseif ( ! $published && 'decrease' === $action && ! $anonymous ) {
-		unset( $voice_ids[ array_search( $author, $voice_ids ) ] );
+		unset( $voice_ids[ array_search( $author, $voice_ids, true ) ] );
 	}
 
 	// Count the unique voices.
