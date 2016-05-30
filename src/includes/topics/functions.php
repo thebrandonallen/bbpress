@@ -3085,7 +3085,7 @@ function bbp_update_topic_voice_count( $topic_id = 0 ) {
 	$bbp_db = bbp_db();
 	$query  = $bbp_db->prepare( "SELECT post_author FROM {$bbp_db->posts} WHERE ( post_parent = %d AND post_status = '%s' AND post_type = '%s' AND post_author != 0 ) OR ( ID = %d AND post_type = '%s' );", $topic_id, bbp_get_public_status_id(), bbp_get_reply_post_type(), $topic_id, bbp_get_topic_post_type() );
 	$voice_ids = $bbp_db->get_col( $query );
-	$voice_ids = array_map( 'intval', (array) $voice_ids );
+	$voice_ids = array_map( 'absint', (array) $voice_ids );
 	$count     = count( array_unique( $voice_ids ) );
 
 	// Update the voice ids and count for this topic id
