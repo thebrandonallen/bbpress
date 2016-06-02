@@ -482,6 +482,11 @@ function bbp_new_reply_handler( $action = '' ) {
 		// Get the reply URL
 		$reply_url = bbp_get_reply_url( $reply_id, $redirect_to );
 
+		// Maybe add a 'pending=reply' query arg.
+		if ( $reply_data['post_status'] === bbp_get_pending_status_id() ) {
+			$reply_url = bbp_add_pending( $reply_url, 'reply' );
+		}
+
 		// Allow to be filtered
 		$reply_url = apply_filters( 'bbp_new_reply_redirect_to', $reply_url, $redirect_to, $reply_id );
 
@@ -787,6 +792,11 @@ function bbp_edit_reply_handler( $action = '' ) {
 
 		// Get the reply URL
 		$reply_url = bbp_get_reply_url( $reply_id, $redirect_to );
+
+		// Maybe add a 'pending=reply' query arg.
+		if ( $reply_data['post_status'] === bbp_get_pending_status_id() ) {
+			$reply_url = bbp_add_pending( $reply_url, 'reply' );
+		}
 
 		// Allow to be filtered
 		$reply_url = apply_filters( 'bbp_edit_reply_redirect_to', $reply_url, $redirect_to );

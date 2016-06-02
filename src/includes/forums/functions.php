@@ -343,6 +343,11 @@ function bbp_new_forum_handler( $action = '' ) {
 		// Get the forum URL
 		$redirect_url = bbp_get_forum_permalink( $forum_id, $redirect_to );
 
+		// Maybe add a 'pending=forum' query arg.
+		if ( $forum_data['post_status'] === bbp_get_pending_status_id() ) {
+			$redirect_url = bbp_add_pending( $redirect_url, 'forum' );
+		}
+
 		// Add view all?
 		if ( bbp_get_view_all() || ! empty( $view_all ) ) {
 
@@ -626,6 +631,11 @@ function bbp_edit_forum_handler( $action = '' ) {
 
 		// Get the forum URL
 		$forum_url = bbp_get_forum_permalink( $forum_id, $redirect_to );
+
+		// Maybe add a 'pending=forum' query arg.
+		if ( $forum_data['post_status'] === bbp_get_pending_status_id() ) {
+			$forum_url = bbp_add_pending( $forum_url, 'forum' );
+		}
 
 		// Add view all?
 		if ( ! empty( $view_all ) ) {

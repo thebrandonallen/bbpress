@@ -433,6 +433,11 @@ function bbp_new_topic_handler( $action = '' ) {
 		// Get the topic URL
 		$redirect_url = bbp_get_topic_permalink( $topic_id, $redirect_to );
 
+		// Maybe add a 'pending=topic' query arg.
+		if ( $topic_data['post_status'] === bbp_get_pending_status_id() ) {
+			$redirect_url = bbp_add_pending( $redirect_url, 'topic' );
+		}
+
 		// Add view all?
 		if ( bbp_get_view_all() || ! empty( $view_all ) ) {
 
@@ -807,6 +812,11 @@ function bbp_edit_topic_handler( $action = '' ) {
 
 		// Get the topic URL
 		$topic_url = bbp_get_topic_permalink( $topic_id, $redirect_to );
+
+		// Maybe add a 'pending=topic' query arg.
+		if ( $topic_data['post_status'] === bbp_get_pending_status_id() ) {
+			$topic_url = bbp_add_pending( $topic_url, 'topic' );
+		}
 
 		// Add view all?
 		if ( ! empty( $view_all ) ) {

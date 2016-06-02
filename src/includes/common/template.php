@@ -2493,6 +2493,52 @@ function bbp_allowed_tags() {
 /** Errors & Messages *********************************************************/
 
 /**
+ * Displays the pending forum/topic/reply notice.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @return void
+ */
+function bbp_pending_notices() {
+
+	// Bail if we don't have a pending query arg.
+	if ( ! bbp_get_pending() ) {
+		return;
+	}
+
+	// Get the pending object type.
+	$type = sanitize_key( $_GET['pending'] );
+
+	// Set the notice text based on the object type.
+	switch ( $type ) {
+
+		case 'forum' :
+			$notice_text = __( 'Your forum has been successfully submitted and is pending moderator approval.', 'bbpress' );
+			break;
+
+		case 'topic' :
+			$notice_text = __( 'Your topic has been successfully submitted and is pending moderator approval.', 'bbpress' );
+			break;
+
+		case 'reply' :
+			$notice_text = __( 'Your reply has been successfully submitted and is pending moderator approval.', 'bbpress' );
+			break;
+
+		default :
+			$notice_text = '';
+			break;
+	}
+
+	// Filter notice text and bail if empty.
+	$notice_text = apply_filters( 'bbp_pending_notices', $notice_text, $type );
+	if ( empty( $notice_text ) ) {
+		return;
+	}
+
+	bbp_add_error( 'bbp_pending_notices', $notice_text, 'message' );
+}
+
+/**
  * Display possible errors & messages inside a template file
  *
  * @since 2.0.0 bbPress (r2688)

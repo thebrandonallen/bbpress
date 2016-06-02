@@ -300,6 +300,49 @@ function bbp_get_view_all( $cap = 'moderate' ) {
 }
 
 /**
+ * Append 'pending=type' to query string if it's already there from referer.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param string $original_link Original Link to be modified.
+ * @param string $type          The type of object pending.
+ *
+ * @return string The link with 'pending=type' appended if necessary.
+ */
+function bbp_add_pending( $original_link = '', $type = '' ) {
+
+	// Appending the pending=type vars.
+	$link = add_query_arg( array( 'pending' => $type ), $original_link );
+
+	return apply_filters( 'bbp_add_pending', $link, $original_link );
+}
+
+/**
+ * Remove 'pending=type' from query string.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param string $original_link Original Link to be modified.
+ *
+ * @return string The link with 'pending=type' appended if necessary.
+ */
+function bbp_remove_pending( $original_link = '' ) {
+	return apply_filters( 'bbp_remove_pending', remove_query_arg( 'pending', $original_link ), $original_link );
+}
+
+/**
+ * If the pending query arg exists.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @return bool Whether the pending query arg exists.
+ */
+function bbp_get_pending() {
+	$retval = ( isset( $_GET['pending'] ) && in_array( $_GET['pending'], array( 'forum', 'topic', 'reply' ), true ) );
+	return (bool) apply_filters( 'bbp_get_pending', $retval );
+}
+
+/**
  * Assist pagination by returning correct page number
  *
  * @since 2.0.0 bbPress (r2628)

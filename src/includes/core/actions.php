@@ -146,6 +146,7 @@ add_action( 'bbp_widgets_init', array( 'BBP_Stats_Widget',   'register_widget' )
 // Notices (loaded after bbp_init for translations)
 add_action( 'bbp_head',             'bbp_login_notices'    );
 add_action( 'bbp_head',             'bbp_topic_notices'    );
+add_action( 'bbp_init',             'bbp_pending_notices'  );
 add_action( 'bbp_template_notices', 'bbp_template_notices' );
 
 // Always exclude private/hidden forums if needed
