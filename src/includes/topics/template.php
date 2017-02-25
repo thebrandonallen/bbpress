@@ -2390,6 +2390,57 @@ function bbp_topic_voice_count( $topic_id = 0, $integer = false ) {
 	}
 
 /**
+ * Return an array of topic voice ids.
+ *
+ * All `post_author` ids of public replies, along with public and closed topics
+ * are included in this array. Authors of anonymous topics are counted as one
+ * voice. Anonymous replies are not included. Voice ids are stored in the
+ * post_meta table as a comma-separated list, and converted to an array before
+ * being returned.
+ *
+ * @since 2.6.0 bbPress (rXXXX)
+ *
+ * @param int $topic_id The topic id. Required.
+ *
+ * @return void|array An array of voice ids. False on failure.
+ */
+function bbp_get_topic_voice_ids( $topic_id = 0 ) {
+
+	// Validate the topic id.
+	$topic_id = bbp_get_topic_id( $topic_id );
+
+	// Bail if the topic id isn't valid.
+	if ( empty( $topic_id ) ) {
+		return;
+	}
+
+	// Get the voice id post meta.
+	$voice_ids = get_post_meta( $topic_id, '_bbp_voice_id' );
+
+	/*
+	 * Clean up the voice ids array. `wp_parse_id_list()` doesn't fit our needs
+	 * here. We don't want empty strings converted to (int) 0, and we don't want
+	 * the array to be trimmed to unique values only.
+	 */
+	if ( ! empty( $voice_ids ) ) {
+		$voice_ids = array_filter( array_map( 'trim', $voice_ids ), 'strlen' );
+		$voice_ids = array_map( 'intval', $voice_ids );
+	} else {
+		$voice_ids = array();
+	}
+
+	/**
+	 * Filters the voice ids array for a topic.
+	 *
+	 * @since 2.6.0 bbPress (rXXXX)
+	 *
+	 * @param array $voice_ids Array of voice ids.
+	 * @param int   $topic_id  The topic id.
+	 */
+	return (array) apply_filters( 'bbp_get_topic_voice_ids', $voice_ids, $topic_id );
+}
+
+/**
  * Output a the tags of a topic
  *
  * @since 2.0.0 bbPress (r2688)

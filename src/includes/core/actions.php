@@ -316,6 +316,20 @@ add_action( 'bbp_delete_topic',  'bbp_delete_topic_replies'  );
 add_action( 'bbp_spam_topic',    'bbp_spam_topic_replies'    );
 add_action( 'bbp_unspam_topic',  'bbp_unspam_topic_replies'  );
 
+// Voice counts.
+add_action( 'bbp_new_reply',        'bbp_maybe_increase_topic_voice_count' );
+add_action( 'bbp_new_topic',        'bbp_maybe_increase_topic_voice_count' );
+add_action( 'bbp_approved_reply',   'bbp_maybe_increase_topic_voice_count' );
+add_action( 'bbp_unspammed_reply',  'bbp_maybe_increase_topic_voice_count' );
+add_action( 'bbp_untrashed_reply',  'bbp_maybe_increase_topic_voice_count' );
+add_action( 'bbp_unapproved_reply', 'bbp_maybe_decrease_topic_voice_count' );
+add_action( 'bbp_spammed_reply',    'bbp_maybe_decrease_topic_voice_count' );
+add_action( 'bbp_trashed_reply',    'bbp_maybe_decrease_topic_voice_count' );
+
+// Insert topic/reply voice counts.
+add_action( 'bbp_insert_topic', 'bbp_maybe_increase_topic_voice_count'        );
+add_action( 'bbp_insert_reply', 'bbp_maybe_increase_topic_voice_count', 10, 2 );
+
 // User status
 // @todo make these sub-actions
 add_action( 'make_ham_user',  'bbp_make_ham_user'  );
