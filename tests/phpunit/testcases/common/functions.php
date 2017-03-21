@@ -1221,4 +1221,95 @@ class BBP_Tests_Common_Functions extends BBP_UnitTestCase {
 			'This test has not been implemented yet.'
 		);
 	}
+
+	/**
+	 * @covers ::bbp_store_transitioned_post_id
+	 */
+	public function test_bbp_store_transitioned_post_id() {
+		$bbp = bbpress();
+
+		// Reset transitioned posts.
+		$bbp->transitioned_posts = array();
+
+		bbp_store_transitioned_post_id( 1, 'new' );
+		$this->assertArrayHasKey( 1, $bbp->transitioned_posts );
+
+		bbp_store_transitioned_post_id( 2, 'moderated' );
+		$this->assertArrayHasKey( 1, $bbp->transitioned_posts );
+		$this->assertArrayHasKey( 2, $bbp->transitioned_posts );
+	}
+
+	/**
+	 * @covers ::bbp_get_post_transitioned_status
+	 */
+	public function test_bbp_get_post_transitioned_status() {
+
+		// Reset transitioned posts.
+		bbpress()->transitioned_posts = array();
+
+		bbp_store_transitioned_post_id( 1, 'new_public' );
+
+		$status = bbp_get_post_transitioned_status( 1 );
+		$this->assertEquals( 'new_public', $status );
+	}
+
+	/**
+	 * @covers ::bbp_is_post_transitioned_new_public
+	 */
+	public function test_bbp_is_post_transitioned_new_public() {
+
+		// Reset transitioned posts.
+		bbpress()->transitioned_posts = array();
+
+		bbp_store_transitioned_post_id( 1, 'new_public' );
+		$this->assertTrue( bbp_is_post_transitioned_new_public( 1 ) );
+
+		bbp_store_transitioned_post_id( 2, 'moderated' );
+		$this->assertFalse( bbp_is_post_transitioned_new_public( 2 ) );
+	}
+
+	/**
+	 * @covers ::bbp_is_post_transitioned_new_moderated
+	 */
+	public function test_bbp_is_post_transitioned_new_moderated() {
+
+		// Reset transitioned posts.
+		bbpress()->transitioned_posts = array();
+
+		bbp_store_transitioned_post_id( 1, 'new_moderated' );
+		$this->assertTrue( bbp_is_post_transitioned_new_moderated( 1 ) );
+
+		bbp_store_transitioned_post_id( 2, 'moderated' );
+		$this->assertFalse( bbp_is_post_transitioned_new_moderated( 2 ) );
+	}
+
+	/**
+	 * @covers ::bbp_is_post_transitioned_public
+	 */
+	public function test_bbp_is_post_transitioned_public() {
+
+		// Reset transitioned posts.
+		bbpress()->transitioned_posts = array();
+
+		bbp_store_transitioned_post_id( 1, 'public' );
+		$this->assertTrue( bbp_is_post_transitioned_public( 1 ) );
+
+		bbp_store_transitioned_post_id( 2, 'moderated' );
+		$this->assertFalse( bbp_is_post_transitioned_public( 2 ) );
+	}
+
+	/**
+	 * @covers ::bbp_is_post_transitioned_moderated
+	 */
+	public function test_bbp_is_post_transitioned_moderated() {
+
+		// Reset transitioned posts.
+		bbpress()->transitioned_posts = array();
+
+		bbp_store_transitioned_post_id( 1, 'moderated' );
+		$this->assertTrue( bbp_is_post_transitioned_moderated( 1 ) );
+
+		bbp_store_transitioned_post_id( 2, 'new' );
+		$this->assertFalse( bbp_is_post_transitioned_moderated( 2 ) );
+	}
 }

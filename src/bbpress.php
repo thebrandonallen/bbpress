@@ -293,9 +293,10 @@ final class bbPress {
 
 		/** Misc **************************************************************/
 
-		$this->domain         = 'bbpress';      // Unique identifier for retrieving translated strings
-		$this->extend         = new stdClass(); // Plugins add data here
-		$this->errors         = new WP_Error(); // Feedback
+		$this->domain             = 'bbpress';      // Unique identifier for retrieving translated strings
+		$this->extend             = new stdClass(); // Plugins add data here
+		$this->errors             = new WP_Error(); // Feedback
+		$this->transitioned_posts = array();        // Transitioned post ids.
 
 		/** Deprecated ********************************************************/
 

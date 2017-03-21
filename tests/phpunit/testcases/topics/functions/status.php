@@ -419,4 +419,200 @@ class BBP_Tests_Topics_Functions_Status extends BBP_UnitTestCase {
 			'This test has not been implemented yet.'
 		);
 	}
+
+	/**
+	 * @covers ::bbp_transition_topic_status
+	 */
+	public function test_bbp_transition_topic_status() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transition_topic_status(
+			bbp_get_public_status_id(),
+			'new',
+			bbp_get_topic( $t )
+		);
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @covers ::bbp_transition_topic_status_new_public
+	 */
+	public function test_bbp_transition_topic_status_new_public() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transition_topic_status_new_public(
+			bbp_get_public_status_id(),
+			'new',
+			bbp_get_topic( $t )
+		);
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+
+		$this->assertEquals( 'new_public', bbp_get_post_transitioned_status( $t ) );
+	}
+
+	/**
+	 * @covers ::bbp_transition_topic_status_new_moderated
+	 */
+	public function test_bbp_transition_topic_status_new_moderated() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transition_topic_status_new_moderated(
+			bbp_get_pending_status_id(),
+			'new',
+			bbp_get_topic( $t )
+		);
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+
+		$this->assertEquals( 'new_moderated', bbp_get_post_transitioned_status( $t ) );
+	}
+
+	/**
+	 * @covers ::bbp_transition_topic_status_public
+	 */
+	public function test_bbp_transition_topic_status_public() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transition_topic_status_public(
+			bbp_get_public_status_id(),
+			bbp_get_pending_status_id(),
+			bbp_get_topic( $t )
+		);
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+
+		$this->assertEquals( 'public', bbp_get_post_transitioned_status( $t ) );
+	}
+
+	/**
+	 * @covers ::bbp_transition_topic_status_moderated
+	 */
+	public function test_bbp_transition_topic_status_moderated() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transition_topic_status_moderated(
+			bbp_get_pending_status_id(),
+			bbp_get_public_status_id(),
+			bbp_get_topic( $t )
+		);
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+
+		$this->assertEquals( 'moderated', bbp_get_post_transitioned_status( $t ) );
+	}
+
+	/**
+	 * @covers ::bbp_transitioned_topic_status_new_public
+	 */
+	public function test_bbp_transitioned_topic_status_new_public() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transitioned_topic_status_new_public( $t );
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @covers ::bbp_transitioned_topic_status_new_moderated
+	 */
+	public function test_bbp_transitioned_topic_status_new_moderated() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'post_status' => bbp_get_pending_status_id(),
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		$result = bbp_transitioned_topic_status_new_moderated( $t );
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @covers ::bbp_transitioned_topic_status_public
+	 */
+	public function test_bbp_transitioned_topic_status_public() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'post_status' => bbp_get_pending_status_id(),
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		bbp_approve_topic( $t );
+
+		$result = bbp_transitioned_topic_status_public( $t );
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @covers ::bbp_transitioned_topic_status_moderated
+	 */
+	public function test_bbp_transitioned_topic_status_moderated() {
+		$f = $this->factory->forum->create();
+		$t = $this->factory->topic->create( array(
+			'post_parent' => $f,
+			'topic_meta'  => array(
+				'forum_id' => $f,
+			),
+		) );
+
+		bbp_unapprove_topic( $t );
+
+		$result = bbp_transitioned_topic_status_moderated( $t );
+
+		// A true result means the action was added, as failures return false.
+		$this->assertTrue( $result );
+	}
 }

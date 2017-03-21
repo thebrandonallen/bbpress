@@ -917,6 +917,73 @@ function bbp_reply_status( $reply_id = 0 ) {
 	}
 
 /**
+ * Return array of draft/new reply statuses.
+ *
+ * The `new` status is applied by `wp_insert_post` when a post object has no
+ * previous status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @return array
+ */
+function bbp_get_draft_new_reply_statuses() {
+	$statuses = array( 'auto-draft', 'draft', 'new' );
+
+	/**
+	 * Filters the return of `bbp_get_draft_new_reply_statuses()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param array $statuses The draft/new reply statuses.
+	 */
+	return (array) apply_filters( 'bbp_get_draft_new_reply_statuses', $statuses );
+}
+
+/**
+ * Return array of public reply statuses.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @return array
+ */
+function bbp_get_public_reply_statuses() {
+	$statuses = array( bbp_get_public_status_id() );
+
+	/**
+	 * Filters the return of `bbp_get_public_reply_statuses()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param array $statuses The public reply statuses.
+	 */
+	return (array) apply_filters( 'bbp_get_public_reply_statuses', $statuses );
+}
+
+/**
+ * Return array of moderated reply statuses.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @return array
+ */
+function bbp_get_moderated_reply_statuses() {
+	$statuses = array(
+		bbp_get_pending_status_id(),
+		bbp_get_spam_status_id(),
+		bbp_get_trash_status_id(),
+	);
+
+	/**
+	 * Filters the return of `bbp_get_moderated_reply_statuses()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param array $statuses The moderated reply statuses.
+	 */
+	return (array) apply_filters( 'bbp_get_moderated_reply_statuses', $statuses );
+}
+
+/**
  * Is the reply not spam or deleted?
  *
  * @since 2.0.0 bbPress (r3496)

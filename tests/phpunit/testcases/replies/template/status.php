@@ -37,6 +37,40 @@ class BBP_Tests_Repliess_Template_Status extends BBP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::bbp_get_draft_new_reply_statuses
+	 */
+	public function test_bbp_get_draft_new_reply_statuses() {
+
+		$expected = array( 'auto-draft', 'draft', 'new' );
+
+		$this->assertEquals( $expected, bbp_get_draft_new_reply_statuses() );
+	}
+
+	/**
+	 * @covers ::bbp_get_public_reply_statuses
+	 */
+	public function test_bbp_get_public_reply_statuses() {
+
+		$expected = array( bbp_get_public_status_id() );
+
+		$this->assertEquals( $expected, bbp_get_public_reply_statuses() );
+	}
+
+	/**
+	 * @covers ::bbp_get_moderated_reply_statuses
+	 */
+	public function test_bbp_get_moderated_reply_statuses() {
+
+		$expected = array(
+			bbp_get_pending_status_id(),
+			bbp_get_spam_status_id(),
+			bbp_get_trash_status_id(),
+		);
+
+		$this->assertEquals( $expected, bbp_get_moderated_reply_statuses() );
+	}
+
+	/**
 	 * @covers ::bbp_is_reply_published
 	 */
 	public function test_bbp_is_reply_published() {

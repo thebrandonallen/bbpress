@@ -24,6 +24,41 @@ class BBP_Tests_Forums_Template_Status extends BBP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::bbp_get_draft_new_forum_statuses
+	 */
+	public function test_bbp_get_draft_new_forum_statuses() {
+
+		$expected = array( 'auto-draft', 'draft', 'new' );
+
+		$this->assertEquals( $expected, bbp_get_draft_new_forum_statuses() );
+	}
+
+	/**
+	 * @covers ::bbp_get_public_forum_statuses
+	 */
+	public function test_bbp_get_public_forum_statuses() {
+
+		$expected = array(
+			bbp_get_public_status_id(),
+			bbp_get_closed_status_id(),
+			bbp_get_private_status_id(),
+			bbp_get_hidden_status_id(),
+		);
+
+		$this->assertEquals( $expected, bbp_get_public_forum_statuses() );
+	}
+
+	/**
+	 * @covers ::bbp_get_moderated_forum_statuses
+	 */
+	public function test_bbp_get_moderated_forum_statuses() {
+
+		$expected = array( bbp_get_trash_status_id() );
+
+		$this->assertEquals( $expected, bbp_get_moderated_forum_statuses() );
+	}
+
+	/**
 	 * @covers ::bbp_forum_type
 	 * @covers ::bbp_get_forum_type
 	 */

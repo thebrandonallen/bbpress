@@ -164,6 +164,21 @@ add_action( 'trashed_post',   'bbp_trashed_forum'   );
 add_action( 'untrashed_post', 'bbp_untrashed_forum' );
 add_action( 'deleted_post',   'bbp_deleted_forum'   );
 
+// Transition forum status.
+add_action( 'transition_post_status',      'bbp_transition_forum_status',               10, 3 );
+add_action( 'bbp_transition_forum_status', 'bbp_transition_forum_status_new_public',    10, 3 );
+add_action( 'bbp_transition_forum_status', 'bbp_transition_forum_status_new_moderated', 10, 3 );
+add_action( 'bbp_transition_forum_status', 'bbp_transition_forum_status_public',        10, 3 );
+add_action( 'bbp_transition_forum_status', 'bbp_transition_forum_status_moderated',     10, 3 );
+
+// Transitioned forum status.
+add_action( 'bbp_new_forum',       'bbp_transitioned_forum_status_new_public',    20 );
+add_action( 'bbp_new_forum',       'bbp_transitioned_forum_status_new_moderated', 20 );
+add_action( 'bbp_insert_forum',    'bbp_transitioned_forum_status_new_public',    20 );
+add_action( 'bbp_insert_forum',    'bbp_transitioned_forum_status_new_moderated', 20 );
+add_action( 'bbp_trashed_forum',   'bbp_transitioned_forum_status_moderated',     20 );
+add_action( 'bbp_untrashed_forum', 'bbp_transitioned_forum_status_public',        20 );
+
 // Auto trash/untrash/delete a forums topics
 add_action( 'bbp_delete_forum',  'bbp_delete_forum_topics',  10 );
 add_action( 'bbp_trash_forum',   'bbp_trash_forum_topics',   10 );
@@ -193,6 +208,25 @@ add_action( 'trashed_post',   'bbp_trashed_reply'   );
 add_action( 'untrashed_post', 'bbp_untrashed_reply' );
 add_action( 'deleted_post',   'bbp_deleted_reply'   );
 
+// Transition reply status.
+add_action( 'transition_post_status',      'bbp_transition_reply_status',               10, 3 );
+add_action( 'bbp_transition_reply_status', 'bbp_transition_reply_status_new_public',    10, 3 );
+add_action( 'bbp_transition_reply_status', 'bbp_transition_reply_status_new_moderated', 10, 3 );
+add_action( 'bbp_transition_reply_status', 'bbp_transition_reply_status_public',        10, 3 );
+add_action( 'bbp_transition_reply_status', 'bbp_transition_reply_status_moderated',     10, 3 );
+
+// Transitioned reply status.
+add_action( 'bbp_new_reply',        'bbp_transitioned_reply_status_new_public',    20 );
+add_action( 'bbp_new_reply',        'bbp_transitioned_reply_status_new_moderated', 20 );
+add_action( 'bbp_insert_reply',     'bbp_transitioned_reply_status_new_public',    20 );
+add_action( 'bbp_insert_reply',     'bbp_transitioned_reply_status_new_moderated', 20 );
+add_action( 'bbp_trashed_reply',    'bbp_transitioned_reply_status_moderated',     20 );
+add_action( 'bbp_untrashed_reply',  'bbp_transitioned_reply_status_public',        20 );
+add_action( 'bbp_spammed_reply',    'bbp_transitioned_reply_status_moderated',     20 );
+add_action( 'bbp_unspammed_reply',  'bbp_transitioned_reply_status_public',        20 );
+add_action( 'bbp_approved_reply',   'bbp_transitioned_reply_status_public',        20 );
+add_action( 'bbp_unapproved_reply', 'bbp_transitioned_reply_status_moderated',     20 );
+
 // New/Edit Topic
 add_action( 'bbp_new_topic',  'bbp_update_topic', 10, 5 );
 add_action( 'bbp_edit_topic', 'bbp_update_topic', 10, 5 );
@@ -214,6 +248,25 @@ add_action( 'delete_post',   'bbp_delete_topic'  );
 add_action( 'trashed_post',   'bbp_trashed_topic'   );
 add_action( 'untrashed_post', 'bbp_untrashed_topic' );
 add_action( 'deleted_post',   'bbp_deleted_topic'   );
+
+// Transition topic status.
+add_action( 'transition_post_status',      'bbp_transition_topic_status',               10, 3 );
+add_action( 'bbp_transition_topic_status', 'bbp_transition_topic_status_new_public',    10, 3 );
+add_action( 'bbp_transition_topic_status', 'bbp_transition_topic_status_new_moderated', 10, 3 );
+add_action( 'bbp_transition_topic_status', 'bbp_transition_topic_status_public',        10, 3 );
+add_action( 'bbp_transition_topic_status', 'bbp_transition_topic_status_moderated',     10, 3 );
+
+// Transitioned topic status.
+add_action( 'bbp_new_topic',        'bbp_transitioned_topic_status_new_public',    20 );
+add_action( 'bbp_new_topic',        'bbp_transitioned_topic_status_new_moderated', 20 );
+add_action( 'bbp_insert_topic',     'bbp_transitioned_topic_status_new_public',    20 );
+add_action( 'bbp_insert_topic',     'bbp_transitioned_topic_status_new_moderated', 20 );
+add_action( 'bbp_trashed_topic',    'bbp_transitioned_topic_status_moderated',     20 );
+add_action( 'bbp_untrashed_topic',  'bbp_transitioned_topic_status_public',        20 );
+add_action( 'bbp_spammed_topic',    'bbp_transitioned_topic_status_moderated',     20 );
+add_action( 'bbp_unspammed_topic',  'bbp_transitioned_topic_status_public',        20 );
+add_action( 'bbp_approved_topic',   'bbp_transitioned_topic_status_public',        20 );
+add_action( 'bbp_unapproved_topic', 'bbp_transitioned_topic_status_moderated',     20 );
 
 // Favorites
 add_action( 'bbp_spam_topic',   'bbp_remove_topic_from_all_favorites' );
@@ -253,61 +306,35 @@ add_action( 'bbp_approved_reply',   'bbp_update_reply_walker' );
 add_action( 'bbp_unapproved_reply', 'bbp_update_reply_walker' );
 
 // Update forum topic/reply counts.
-add_action( 'bbp_new_reply',        'bbp_increase_forum_reply_count'        );
-add_action( 'bbp_new_topic',        'bbp_increase_forum_topic_count'        );
-add_action( 'bbp_trashed_reply',    'bbp_decrease_forum_reply_count'        );
-add_action( 'bbp_trashed_topic',    'bbp_decrease_forum_topic_count'        );
-add_action( 'bbp_trashed_topic',    'bbp_increase_forum_topic_count_hidden' );
-add_action( 'bbp_untrashed_reply',  'bbp_increase_forum_reply_count'        );
-add_action( 'bbp_untrashed_topic',  'bbp_increase_forum_topic_count'        );
-add_action( 'bbp_untrashed_topic',  'bbp_decrease_forum_topic_count_hidden' );
-add_action( 'bbp_spammed_reply',    'bbp_decrease_forum_reply_count'        );
-add_action( 'bbp_spammed_topic',    'bbp_decrease_forum_topic_count'        );
-add_action( 'bbp_spammed_topic',    'bbp_increase_forum_topic_count_hidden' );
-add_action( 'bbp_unspammed_reply',  'bbp_increase_forum_reply_count'        );
-add_action( 'bbp_unspammed_topic',  'bbp_increase_forum_topic_count'        );
-add_action( 'bbp_unspammed_topic',  'bbp_decrease_forum_topic_count_hidden' );
-add_action( 'bbp_approved_reply',   'bbp_increase_forum_reply_count'        );
-add_action( 'bbp_approved_topic',   'bbp_increase_forum_topic_count'        );
-add_action( 'bbp_approved_topic',   'bbp_decrease_forum_topic_count_hidden' );
-add_action( 'bbp_unapproved_reply', 'bbp_decrease_forum_reply_count'        );
-add_action( 'bbp_unapproved_topic', 'bbp_decrease_forum_topic_count'        );
-add_action( 'bbp_unapproved_topic', 'bbp_increase_forum_topic_count_hidden' );
+add_action( 'bbp_transitioned_reply_status_new_public',    'bbp_increase_forum_reply_count'        );
+add_action( 'bbp_transitioned_reply_status_public',        'bbp_increase_forum_reply_count'        );
+add_action( 'bbp_transitioned_reply_status_moderated',     'bbp_decrease_forum_reply_count'        );
+add_action( 'bbp_transitioned_topic_status_new_public',    'bbp_increase_forum_topic_count'        );
+add_action( 'bbp_transitioned_topic_status_new_moderated', 'bbp_increase_forum_topic_count_hidden' );
+add_action( 'bbp_transitioned_topic_status_public',        'bbp_increase_forum_topic_count'        );
+add_action( 'bbp_transitioned_topic_status_public',        'bbp_decrease_forum_topic_count_hidden' );
+add_action( 'bbp_transitioned_topic_status_moderated',     'bbp_decrease_forum_topic_count'        );
+add_action( 'bbp_transitioned_topic_status_moderated',     'bbp_increase_forum_topic_count_hidden' );
 
 // Update forum reply counts for approved/unapproved topics.
 add_action( 'bbp_approved_topic',   'bbp_approved_unapproved_topic_update_forum_reply_count' );
 add_action( 'bbp_unapproved_topic', 'bbp_approved_unapproved_topic_update_forum_reply_count' );
 
 // Update topic reply counts.
-add_action( 'bbp_new_reply',        'bbp_increase_topic_reply_count'        );
-add_action( 'bbp_trashed_reply',    'bbp_decrease_topic_reply_count'        );
-add_action( 'bbp_trashed_reply',    'bbp_increase_topic_reply_count_hidden' );
-add_action( 'bbp_untrashed_reply',  'bbp_increase_topic_reply_count'        );
-add_action( 'bbp_untrashed_reply',  'bbp_decrease_topic_reply_count_hidden' );
-add_action( 'bbp_spammed_reply',    'bbp_decrease_topic_reply_count'        );
-add_action( 'bbp_spammed_reply',    'bbp_increase_topic_reply_count_hidden' );
-add_action( 'bbp_unspammed_reply',  'bbp_increase_topic_reply_count'        );
-add_action( 'bbp_unspammed_reply',  'bbp_decrease_topic_reply_count_hidden' );
-add_action( 'bbp_approved_reply',   'bbp_increase_topic_reply_count'        );
-add_action( 'bbp_approved_reply',   'bbp_decrease_topic_reply_count_hidden' );
-add_action( 'bbp_unapproved_reply', 'bbp_decrease_topic_reply_count'        );
-add_action( 'bbp_unapproved_reply', 'bbp_increase_topic_reply_count_hidden' );
+add_action( 'bbp_transitioned_reply_status_new_public',    'bbp_increase_topic_reply_count'        );
+add_action( 'bbp_transitioned_reply_status_new_moderated', 'bbp_increase_topic_reply_count_hidden' );
+add_action( 'bbp_transitioned_reply_status_public',        'bbp_increase_topic_reply_count'        );
+add_action( 'bbp_transitioned_reply_status_public',        'bbp_decrease_topic_reply_count_hidden' );
+add_action( 'bbp_transitioned_reply_status_moderated',     'bbp_decrease_topic_reply_count'        );
+add_action( 'bbp_transitioned_reply_status_moderated',     'bbp_increase_topic_reply_count_hidden' );
 
 // Users topic & reply counts.
-add_action( 'bbp_new_topic',     'bbp_increase_user_topic_count' );
-add_action( 'bbp_new_reply',     'bbp_increase_user_reply_count' );
-add_action( 'bbp_untrash_topic', 'bbp_increase_user_topic_count' );
-add_action( 'bbp_untrash_reply', 'bbp_increase_user_reply_count' );
-add_action( 'bbp_unspam_topic',  'bbp_increase_user_topic_count' );
-add_action( 'bbp_unspam_reply',  'bbp_increase_user_reply_count' );
-add_action( 'bbp_trash_topic',   'bbp_decrease_user_topic_count' );
-add_action( 'bbp_trash_reply',   'bbp_decrease_user_reply_count' );
-add_action( 'bbp_spam_topic',    'bbp_decrease_user_topic_count' );
-add_action( 'bbp_spam_reply',    'bbp_decrease_user_reply_count' );
-
-// Insert topic/reply counts.
-add_action( 'bbp_insert_topic', 'bbp_insert_topic_update_counts', 10, 2 );
-add_action( 'bbp_insert_reply', 'bbp_insert_reply_update_counts', 10, 3 );
+add_action( 'bbp_transitioned_reply_status_new_public', 'bbp_increase_user_reply_count' );
+add_action( 'bbp_transitioned_reply_status_public',     'bbp_increase_user_reply_count' );
+add_action( 'bbp_transitioned_reply_status_moderated',  'bbp_decrease_user_reply_count' );
+add_action( 'bbp_transitioned_topic_status_new_public', 'bbp_increase_user_topic_count' );
+add_action( 'bbp_transitioned_topic_status_public',     'bbp_increase_user_topic_count' );
+add_action( 'bbp_transitioned_topic_status_moderated',  'bbp_decrease_user_topic_count' );
 
 // Update topic voice counts.
 add_action( 'bbp_new_reply',        'bbp_update_topic_voice_count' );

@@ -13,7 +13,9 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 	 * Generic function to test the topics counts with a new reply
 	 */
 	public function test_bbp_topic_new_reply_counts() {
-		remove_action( 'bbp_insert_reply', 'bbp_insert_reply_update_counts', 10 );
+
+		// Remove the transitioned new action so we can simulate a new reply.
+		remove_action( 'bbp_insert_reply', 'bbp_transitioned_reply_status_new' );
 
 		$u  = $this->factory->user->create();
 		$u2 = $this->factory->user->create();
@@ -34,11 +36,8 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 			),
 		) );
 
-		// Don't attempt to send an email. This is for speed and PHP errors.
-		remove_action( 'bbp_new_reply', 'bbp_notify_topic_subscribers', 11, 5 );
-
-		// Simulate the 'bbp_new_reply' action.
-		do_action( 'bbp_new_reply', $r1, $t, $f, false, bbp_get_current_user_id() );
+		// Simulate the 'bbp_transitioned_reply_status_new' action.
+		do_action( 'bbp_transitioned_reply_status_new', $r1 );
 
 		$count = bbp_get_topic_reply_count( $t, true );
 		$this->assertSame( 1, $count );
@@ -58,8 +57,8 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 			),
 		) );
 
-		// Simulate the 'bbp_new_topic' action.
-		do_action( 'bbp_new_reply', $r2, $t, $f, false, $u2 );
+		// Simulate the 'bbp_transitioned_reply_status_new' action.
+		do_action( 'bbp_transitioned_reply_status_new', $r2 );
 
 		$count = bbp_get_topic_reply_count( $t, true );
 		$this->assertSame( 2, $count );
@@ -70,9 +69,8 @@ class BBP_Tests_Topics_Functions_Counts extends BBP_UnitTestCase {
 		$count = bbp_get_topic_voice_count( $t, true );
 		$this->assertSame( 2, $count );
 
-		// Re-add removed actions.
-		add_action( 'bbp_insert_reply', 'bbp_insert_reply_update_counts', 10, 2 );
-		add_action( 'bbp_new_reply',    'bbp_notify_topic_subscribers',   11, 5 );
+		// Re-add the transitioned new action.
+		add_action( 'bbp_insert_reply', 'bbp_transitioned_reply_status_new' );
 	}
 
 	/**

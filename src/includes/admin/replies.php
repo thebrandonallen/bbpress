@@ -82,6 +82,12 @@ class BBP_Replies_Admin {
 		add_action( 'add_meta_boxes', array( $this, 'comments_metabox'   ) );
 		add_action( 'save_post',      array( $this, 'save_meta_boxes'    ) );
 
+		// Transitioned reply actions.
+		add_action( 'save_post', 'bbp_transitioned_reply_status_new_public',    20 );
+		add_action( 'save_post', 'bbp_transitioned_reply_status_new_moderated', 20 );
+		add_action( 'save_post', 'bbp_transitioned_reply_status_public',        20 );
+		add_action( 'save_post', 'bbp_transitioned_reply_status_moderated',     20 );
+
 		// Check if there are any bbp_toggle_reply_* requests on admin_init, also have a message displayed
 		add_action( 'load-edit.php',  array( $this, 'toggle_reply'        ) );
 		add_action( 'admin_notices',  array( $this, 'toggle_reply_notice' ) );

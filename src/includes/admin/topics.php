@@ -86,6 +86,12 @@ class BBP_Topics_Admin {
 		add_action( 'add_meta_boxes', array( $this, 'comments_metabox'      ) );
 		add_action( 'save_post',      array( $this, 'save_meta_boxes'       ) );
 
+		// Transitioned topic actions.
+		add_action( 'save_post', 'bbp_transitioned_topic_status_new_public',    20 );
+		add_action( 'save_post', 'bbp_transitioned_topic_status_new_moderated', 20 );
+		add_action( 'save_post', 'bbp_transitioned_topic_status_public',        20 );
+		add_action( 'save_post', 'bbp_transitioned_topic_status_moderated',     20 );
+
 		// Check if there are any bbp_toggle_topic_* requests on admin_init, also have a message displayed
 		add_action( 'load-edit.php',  array( $this, 'toggle_topic'        ) );
 		add_action( 'admin_notices',  array( $this, 'toggle_topic_notice' ) );

@@ -266,6 +266,10 @@ class BBP_Tests_Users_Functions_Counts extends BBP_UnitTestCase {
 	 * @covers ::bbp_increase_user_topic_count
 	 */
 	public function test_bbp_increase_user_topic_count() {
+
+		// Remove the transitioned new action so we manually manipulate counts.
+		remove_action( 'bbp_insert_topic', 'bbp_transitioned_topic_status_new_public', 20 );
+
 		$u = $this->factory->user->create();
 		$int_value = 3;
 		$integer = true;
@@ -283,12 +287,19 @@ class BBP_Tests_Users_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_user_topic_count( $u, $integer );
 		$this->assertSame( $int_value + 1, $count );
+
+		// Re-add the transitioned new action.
+		add_action( 'bbp_insert_topic', 'bbp_transitioned_topic_status_new_public', 20 );
 	}
 
 	/**
 	 * @covers ::bbp_increase_user_reply_count
 	 */
 	public function test_bbp_increase_user_reply_count() {
+
+		// Remove the transitioned new action so we manually manipulate counts.
+		remove_action( 'bbp_insert_reply', 'bbp_transitioned_reply_status_new_public', 20 );
+
 		$u = $this->factory->user->create();
 		$int_value = 3;
 		$integer = true;
@@ -312,12 +323,19 @@ class BBP_Tests_Users_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_user_reply_count( $u, $integer );
 		$this->assertSame( $int_value, $count );
+
+		// Re-add the transitioned new action.
+		add_action( 'bbp_insert_reply', 'bbp_transitioned_reply_status_new_public', 20 );
 	}
 
 	/**
 	 * @covers ::bbp_decrease_user_topic_count
 	 */
 	public function test_bbp_decrease_user_topic_count() {
+
+		// Remove the transitioned new action so we manually manipulate counts.
+		remove_action( 'bbp_insert_topic', 'bbp_transitioned_topic_status_new_public', 20 );
+
 		$u = $this->factory->user->create();
 		$int_value = 3;
 		$integer = true;
@@ -342,12 +360,19 @@ class BBP_Tests_Users_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_user_topic_count( $u, $integer );
 		$this->assertSame( $int_value - 2, $count );
+
+		// Re-add the transitioned new action.
+		add_action( 'bbp_insert_topic', 'bbp_transitioned_topic_status_new_public', 20 );
 	}
 
 	/**
 	 * @covers ::bbp_decrease_user_reply_count
 	 */
 	public function test_bbp_decrease_user_reply_count() {
+
+		// Remove the transitioned new action so we manually manipulate counts.
+		remove_action( 'bbp_insert_reply', 'bbp_transitioned_reply_status_new_public', 20 );
+
 		$u = $this->factory->user->create();
 		$int_value = 3;
 		$integer = true;
@@ -378,5 +403,8 @@ class BBP_Tests_Users_Functions_Counts extends BBP_UnitTestCase {
 
 		$count = bbp_get_user_reply_count( $u, $integer );
 		$this->assertSame( $int_value - 2, $count );
+
+		// Re-add the transitioned new action.
+		add_action( 'bbp_insert_reply', 'bbp_transitioned_reply_status_new_public', 20 );
 	}
 }

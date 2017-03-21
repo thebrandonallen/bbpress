@@ -1972,7 +1972,7 @@ function bbp_update_forum( $args = array() ) {
 	bbp_update_forum_subforum_count( $r['forum_id'] );
 
 	// Only update topic count if we're deleting a topic, or in the dashboard.
-	if ( in_array( current_filter(), array( 'bbp_deleted_topic', 'save_post' ), true ) ) {
+	if ( 'bbp_deleted_topic' === current_action() ) {
 		bbp_update_forum_reply_count(        $r['forum_id'] );
 		bbp_update_forum_topic_count(        $r['forum_id'] );
 		bbp_update_forum_topic_count_hidden( $r['forum_id'] );
@@ -2778,4 +2778,380 @@ function bbp_untrashed_forum( $forum_id = 0 ) {
 	}
 
 	do_action( 'bbp_untrashed_forum', $forum_id );
+}
+/** Transition Forum Statuses *************************************************/
+
+/**
+ * Called when transitioning a forum's post status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $post       The post object.
+ *
+ * @return bool
+ */
+function bbp_transition_forum_status( $new_status, $old_status, $post ) {
+
+	// Validate the forum.
+	$forum = bbp_get_forum( $post );
+
+	// Bail if the post object isn't a forum.
+	if ( empty( $forum ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a forum's post status is transitioned.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The old post status.
+	 * @param WP_Post $forum      The forum post object.
+	 */
+	do_action( 'bbp_transition_forum_status', $new_status, $old_status, $forum );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a forum's post status to a public status from a
+ * draft/new status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $forum      The forum post object.
+ *
+ * @return bool
+ */
+function bbp_transition_forum_status_new_public( $new_status, $old_status, $forum ) {
+
+	// Validate the forum.
+	$forum = bbp_get_forum( $forum );
+
+	// Bail if the post object isn't a forum.
+	if ( empty( $forum ) ) {
+		return false;
+	}
+
+	// Is the new status public?
+	if ( ! in_array( $new_status, bbp_get_public_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status draft or new?
+	if ( ! in_array( $old_status, bbp_get_draft_new_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	$forum_id = bbp_get_forum_id( $forum->ID );
+
+	// Store the transitioned forum id.
+	bbp_store_transitioned_post_id( $forum_id, 'new_public' );
+
+	/**
+	 * Fires when a forum's post status is transitioned to a public status from
+	 * a draft/new status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transition_forum_status_new_public', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a forum's post status to a moderated status from a
+ * draft/new status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $forum      The forum post object.
+ *
+ * @return bool
+ */
+function bbp_transition_forum_status_new_moderated( $new_status, $old_status, $forum ) {
+
+	// Validate the reply.
+	$forum = bbp_get_forum( $forum );
+
+	// Bail if the post object isn't a forum.
+	if ( empty( $forum ) ) {
+		return false;
+	}
+
+	// Is the new status moderated?
+	if ( ! in_array( $new_status, bbp_get_moderated_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status draft or new?
+	if ( ! in_array( $old_status, bbp_get_draft_new_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	$forum_id = bbp_get_forum_id( $forum->ID );
+
+	// Store the transitioned forum id.
+	bbp_store_transitioned_post_id( $forum_id, 'new_moderated' );
+
+	/**
+	 * Fires when a forum's post status is transitioned to a public status from
+	 * a draft/new status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transition_forum_status_new_moderated', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a forum's post status to a public status from a
+ * moderated status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $forum      The forum post object.
+ *
+ * @return bool
+ */
+function bbp_transition_forum_status_public( $new_status, $old_status, $forum ) {
+
+	// Validate the forum.
+	$forum = bbp_get_forum( $forum );
+
+	// Bail if the post object isn't a forum.
+	if ( empty( $forum ) ) {
+		return false;
+	}
+
+	// Is the new status public?
+	if ( ! in_array( $new_status, bbp_get_public_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status moderated?
+	if ( ! in_array( $old_status, bbp_get_moderated_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	$forum_id = bbp_get_forum_id( $forum->ID );
+
+	// Store the transitioned forum id.
+	bbp_store_transitioned_post_id( $forum_id, 'public' );
+
+	/**
+	 * Fires when a forum's post status is transitioned to a public status from
+	 * a moderated status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transition_forum_status_public', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a forum's post status to a moderated status from a
+ * public status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $forum      The forum post object.
+ *
+ * @return bool
+ */
+function bbp_transition_forum_status_moderated( $new_status, $old_status, $forum ) {
+
+	// Validate the forum.
+	$forum = bbp_get_forum( $forum );
+
+	// Bail if the post object isn't a forum.
+	if ( empty( $forum ) ) {
+		return false;
+	}
+
+	// Is the new status moderated?
+	if ( ! in_array( $new_status, bbp_get_moderated_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status public?
+	if ( ! in_array( $old_status, bbp_get_public_forum_statuses(), true ) ) {
+		return false;
+	}
+
+	$forum_id = bbp_get_forum_id( $forum->ID );
+
+	// Store the transitioned forum id.
+	bbp_store_transitioned_post_id( $forum_id, 'moderated' );
+
+	/**
+	 * Fires when a forum's post status is transitioned to a moderated status
+	 * from a public status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transition_forum_status_moderated', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a forum's post status to a public status from a
+ * draft/new status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $forum_id The forum id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_forum_status_new_public( $forum_id = 0 ) {
+	$forum_id = bbp_get_forum_id( $forum_id );
+
+	if ( empty( $forum_id ) || ! bbp_is_forum( $forum_id ) ) {
+		return false;
+	}
+
+	// Bail if the forum wasn't transitioned to a new public status.
+	if ( ! bbp_is_post_transitioned_new_public( $forum_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a forum's post status is transitioned to a public status from
+	 * a draft/new status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transitioned_forum_status_new_public', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a forum's post status to a moderated status from a
+ * draft/new status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $forum_id The forum id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_forum_status_new_moderated( $forum_id = 0 ) {
+	$forum_id = bbp_get_forum_id( $forum_id );
+
+	if ( empty( $forum_id ) || ! bbp_is_forum( $forum_id ) ) {
+		return false;
+	}
+
+	// Bail if the forum wasn't transitioned to a new moderated status.
+	if ( ! bbp_is_post_transitioned_new_moderated( $forum_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a forum's post status is transitioned to a moderated status
+	 * from a draft/new status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transitioned_forum_status_new_moderated', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a forum's post status to a public status from a
+ * moderated status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $forum_id The forum id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_forum_status_public( $forum_id = 0 ) {
+	$forum_id = bbp_get_forum_id( $forum_id );
+
+	if ( empty( $forum_id ) || ! bbp_is_forum( $forum_id ) ) {
+		return false;
+	}
+
+	// Bail if the forum wasn't transitioned to a public status.
+	if ( ! bbp_is_post_transitioned_public( $forum_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a forum's post status is transitioned to a public status from
+	 * a public status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transitioned_forum_status_public', $forum_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a forum's post status to a moderated status from a
+ * public status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $forum_id The forum id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_forum_status_moderated( $forum_id = 0 ) {
+	$forum_id = bbp_get_forum_id( $forum_id );
+
+	if ( empty( $forum_id ) || ! bbp_is_forum( $forum_id ) ) {
+		return false;
+	}
+
+	// Bail if the forum wasn't transitioned to a moderated status.
+	if ( ! bbp_is_post_transitioned_moderated( $forum_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a forum's post status is transitioned to a moderated status
+	 * from a public status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $forum_id The forum id.
+	 */
+	do_action( 'bbp_transitioned_forum_status_moderated', $forum_id );
+
+	return true;
 }

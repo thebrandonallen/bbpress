@@ -54,6 +54,40 @@ class BBP_Tests_Topics_Template_Status extends BBP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::bbp_get_draft_new_topic_statuses
+	 */
+	public function test_bbp_get_draft_new_topic_statuses() {
+
+		$expected = array( 'auto-draft', 'draft', 'new' );
+
+		$this->assertEquals( $expected, bbp_get_draft_new_topic_statuses() );
+	}
+
+	/**
+	 * @covers ::bbp_get_public_topic_statuses
+	 */
+	public function test_bbp_get_public_topic_statuses() {
+
+		$expected = array( bbp_get_public_status_id(), bbp_get_closed_status_id() );
+
+		$this->assertEquals( $expected, bbp_get_public_topic_statuses() );
+	}
+
+	/**
+	 * @covers ::bbp_get_moderated_topic_statuses
+	 */
+	public function test_bbp_get_moderated_topic_statuses() {
+
+		$expected = array(
+			bbp_get_pending_status_id(),
+			bbp_get_spam_status_id(),
+			bbp_get_trash_status_id(),
+		);
+
+		$this->assertEquals( $expected, bbp_get_moderated_topic_statuses() );
+	}
+
+	/**
 	 * @covers ::bbp_is_topic_closed
 	 * @todo   Implement test_bbp_is_topic_closed().
 	 */

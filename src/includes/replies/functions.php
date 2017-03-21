@@ -84,6 +84,8 @@ function bbp_insert_reply( $reply_data = array(), $reply_meta = array() ) {
  * Update counts after a reply is inserted via `bbp_insert_reply`.
  *
  * @since 2.6.0 bbPress (r6036)
+ * @deprecated x.x.x bbPress (rXXXX)
+ * @todo Do we completely remove, or add a deprecation notice?
  *
  * @param int $reply_id The reply id.
  * @param int $topic_id The topic id.
@@ -1015,7 +1017,7 @@ function bbp_update_reply_walker( $reply_id, $last_active_time = '', $forum_id =
 				bbp_update_topic_last_active_time( $ancestor, $topic_last_active_time );
 
 				// Only update reply count if we're deleting a reply, or in the dashboard.
-				if ( in_array( current_filter(), array( 'bbp_deleted_reply', 'save_post' ), true ) ) {
+				if ( 'bbp_deleted_reply' === current_action() ) {
 					bbp_update_topic_reply_count(        $ancestor );
 					bbp_update_topic_reply_count_hidden( $ancestor );
 					bbp_update_topic_voice_count(        $ancestor );
@@ -1044,7 +1046,7 @@ function bbp_update_reply_walker( $reply_id, $last_active_time = '', $forum_id =
 
 				// Counts
 				// Only update reply count if we're deleting a reply, or in the dashboard.
-				if ( in_array( current_filter(), array( 'bbp_deleted_reply', 'save_post' ), true ) ) {
+				if ( 'bbp_deleted_reply' === current_action() ) {
 					bbp_update_forum_reply_count( $ancestor );
 				}
 			}
@@ -2102,6 +2104,383 @@ function bbp_untrashed_reply( $reply_id = 0 ) {
 	}
 
 	do_action( 'bbp_untrashed_reply', $reply_id );
+}
+
+/** Transition Reply Statuses *************************************************/
+
+/**
+ * Called when transitioning a reply's post status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $post       The post object.
+ *
+ * @return bool
+ */
+function bbp_transition_reply_status( $new_status, $old_status, $post ) {
+
+	// Validate the reply.
+	$reply = bbp_get_reply( $post );
+
+	// Bail if the post object isn't a forum.
+	if ( empty( $reply ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a reply's post status is transitioned.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The old post status.
+	 * @param WP_Post $reply      The reply post object.
+	 */
+	do_action( 'bbp_transition_reply_status', $new_status, $old_status, $reply );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a reply's post status to a public status from a
+ * draft/new status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $reply      The reply post object.
+ *
+ * @return bool
+ */
+function bbp_transition_reply_status_new_public( $new_status, $old_status, $reply ) {
+
+	// Validate the reply.
+	$reply = bbp_get_reply( $reply );
+
+	// Bail if the post object isn't a reply.
+	if ( empty( $reply ) ) {
+		return false;
+	}
+
+	// Is the new status public?
+	if ( ! in_array( $new_status, bbp_get_public_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status draft or new?
+	if ( ! in_array( $old_status, bbp_get_draft_new_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$reply_id = bbp_get_reply_id( $reply->ID );
+
+	// Store the transitioned reply id.
+	bbp_store_transitioned_post_id( $reply_id, 'new_public' );
+
+	/**
+	 * Fires when a reply's post status is transitioned to a public status from
+	 * a draft/new status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transition_reply_status_new_public', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a reply's post status to a moderated status from a
+ * draft/new status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $reply      The reply post object.
+ *
+ * @return bool
+ */
+function bbp_transition_reply_status_new_moderated( $new_status, $old_status, $reply ) {
+
+	// Validate the reply.
+	$reply = bbp_get_reply( $reply );
+
+	// Bail if the post object isn't a reply.
+	if ( empty( $reply ) ) {
+		return false;
+	}
+
+	// Is the new status moderated?
+	if ( ! in_array( $new_status, bbp_get_moderated_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status draft or new?
+	if ( ! in_array( $old_status, bbp_get_draft_new_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$reply_id = bbp_get_reply_id( $reply->ID );
+
+	// Store the transitioned reply id.
+	bbp_store_transitioned_post_id( $reply_id, 'new_moderated' );
+
+	/**
+	 * Fires when a reply's post status is transitioned to a public status from
+	 * a draft/new status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transition_reply_status_new_moderated', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a reply's post status to a public status from a
+ * moderated status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $reply      The reply post object.
+ *
+ * @return bool
+ */
+function bbp_transition_reply_status_public( $new_status, $old_status, $reply ) {
+
+	// Validate the reply.
+	$reply = bbp_get_reply( $reply );
+
+	// Bail if the post object isn't a reply.
+	if ( empty( $reply ) ) {
+		return false;
+	}
+
+	// Is the new status public?
+	if ( ! in_array( $new_status, bbp_get_public_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status moderated?
+	if ( ! in_array( $old_status, bbp_get_moderated_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$reply_id = bbp_get_reply_id( $reply->ID );
+
+	// Store the transitioned reply id.
+	bbp_store_transitioned_post_id( $reply_id, 'public' );
+
+	/**
+	 * Fires when a reply's post status is transitioned to a public status from
+	 * a moderated status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transition_reply_status_public', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a reply's post status to a moderated status from a
+ * public status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $reply      The reply post object.
+ *
+ * @return bool
+ */
+function bbp_transition_reply_status_moderated( $new_status, $old_status, $reply ) {
+
+	// Validate the reply.
+	$reply = bbp_get_reply( $reply );
+
+	// Bail if the post object isn't a reply.
+	if ( empty( $reply ) ) {
+		return false;
+	}
+
+	// Is the new status moderated?
+	if ( ! in_array( $new_status, bbp_get_moderated_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status public?
+	if ( ! in_array( $old_status, bbp_get_public_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$reply_id = bbp_get_reply_id( $reply->ID );
+
+	// Store the transitioned reply id.
+	bbp_store_transitioned_post_id( $reply_id, 'moderated' );
+
+	/**
+	 * Fires when a reply's post status is transitioned to a moderated status
+	 * from a public status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transition_reply_status_moderated', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a reply's post status to a public status from a
+ * draft/new status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $reply_id The reply id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_reply_status_new_public( $reply_id = 0 ) {
+	$reply_id = bbp_get_reply_id( $reply_id );
+
+	if ( empty( $reply_id ) || ! bbp_is_reply( $reply_id ) ) {
+		return false;
+	}
+
+	// Bail if the reply wasn't transitioned to a new public status.
+	if ( ! bbp_is_post_transitioned_new_public( $reply_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a reply's post status is transitioned to a public status from
+	 * a draft/new status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transitioned_reply_status_new_public', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a reply's post status to a moderated status from a
+ * draft/new status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $reply_id The reply id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_reply_status_new_moderated( $reply_id = 0 ) {
+	$reply_id = bbp_get_reply_id( $reply_id );
+
+	if ( empty( $reply_id ) || ! bbp_is_reply( $reply_id ) ) {
+		return false;
+	}
+
+	// Bail if the reply wasn't transitioned to a new moderated status.
+	if ( ! bbp_is_post_transitioned_new_moderated( $reply_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a reply's post status is transitioned to a moderated status
+	 * from a draft/new status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transitioned_reply_status_new_moderated', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a reply's post status to a public status from a
+ * moderated status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $reply_id The reply id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_reply_status_public( $reply_id = 0 ) {
+	$reply_id = bbp_get_reply_id( $reply_id );
+
+	if ( empty( $reply_id ) || ! bbp_is_reply( $reply_id ) ) {
+		return false;
+	}
+
+	// Bail if the reply wasn't transitioned to a public status.
+	if ( ! bbp_is_post_transitioned_public( $reply_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a reply's post status is transitioned to a public status from
+	 * a public status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transitioned_reply_status_public', $reply_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a reply's post status to a moderated status from a
+ * public status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $reply_id The reply id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_reply_status_moderated( $reply_id = 0 ) {
+	$reply_id = bbp_get_reply_id( $reply_id );
+
+	if ( empty( $reply_id ) || ! bbp_is_reply( $reply_id ) ) {
+		return false;
+	}
+
+	// Bail if the reply wasn't transitioned to a moderated status.
+	if ( ! bbp_is_post_transitioned_moderated( $reply_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a reply's post status is transitioned to a moderated status
+	 * from a public status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $reply_id The reply id.
+	 */
+	do_action( 'bbp_transitioned_reply_status_moderated', $reply_id );
+
+	return true;
 }
 
 /** Settings ******************************************************************/

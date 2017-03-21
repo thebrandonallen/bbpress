@@ -13,7 +13,9 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 	 * Generic function to test the forum counts with a new topic
 	 */
 	public function test_bbp_forum_new_topic_counts() {
-		remove_action( 'bbp_insert_topic', 'bbp_insert_topic_update_counts', 10 );
+
+		// Remove the transitioned new action so we can simulate a new topic.
+		remove_action( 'bbp_insert_topic', 'bbp_transitioned_topic_status_new' );
 
 		$f = $this->factory->forum->create();
 		$t1 = $this->factory->topic->create( array(
@@ -25,11 +27,8 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 		) );
 		$u = $this->factory->user->create();
 
-		// Don't attempt to send an email. This is for speed and PHP errors.
-		remove_action( 'bbp_new_topic', 'bbp_notify_forum_subscribers', 11, 4 );
-
-		// Simulate the 'bbp_new_topic' action.
-		do_action( 'bbp_new_topic', $t1, $f, false, bbp_get_current_user_id(), $t1 );
+		// Simulate the 'bbp_transitioned_topic_status_new' action.
+		do_action( 'bbp_transitioned_topic_status_new', $t1 );
 
 		$count = bbp_get_forum_topic_count( $f, true, true );
 		$this->assertSame( 1, $count );
@@ -45,8 +44,8 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 			),
 		) );
 
-		// Simulate the 'bbp_new_topic' action.
-		do_action( 'bbp_new_topic', $t2, $f, false, $u , $t2 );
+		// Simulate the 'bbp_transitioned_topic_status_new' action.
+		do_action( 'bbp_transitioned_topic_status_new', $t2 );
 
 		$count = bbp_get_forum_topic_count( $f, true, true );
 		$this->assertSame( 2, $count );
@@ -54,9 +53,8 @@ class BBP_Tests_Forums_Functions_Counts extends BBP_UnitTestCase {
 		$count = bbp_get_forum_topic_count_hidden( $f, true, true );
 		$this->assertSame( 0, $count );
 
-		// Re-add removed actions.
-		add_action( 'bbp_insert_topic', 'bbp_insert_topic_update_counts', 10, 2 );
-		add_action( 'bbp_new_topic',    'bbp_notify_forum_subscribers',   11, 4 );
+		// Re-add the transitioned new action.
+		add_action( 'bbp_insert_topic', 'bbp_transitioned_topic_status_new' );
 	}
 
 	/**

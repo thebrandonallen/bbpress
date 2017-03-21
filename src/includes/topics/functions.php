@@ -2631,6 +2631,8 @@ function bbp_decrease_topic_reply_count_hidden( $topic_id = 0 ) {
  * Update counts after a topic is inserted via `bbp_insert_topic`.
  *
  * @since 2.6.0 bbPress (r6036)
+ * @deprecated x.x.x bbPress (rXXXX)
+ * @todo Do we completely remove, or add a deprecation notice?
  *
  * @param int $topic_id The topic id.
  * @param int $forum_id The forum id.
@@ -3914,6 +3916,383 @@ function bbp_untrashed_topic( $topic_id = 0 ) {
 	}
 
 	do_action( 'bbp_untrashed_topic', $topic_id );
+}
+
+/** Transition Topic Statuses *************************************************/
+
+/**
+ * Called when transitioning a topic's post status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $post       The post object.
+ *
+ * @return bool
+ */
+function bbp_transition_topic_status( $new_status, $old_status, $post ) {
+
+	// Validate the topic.
+	$topic = bbp_get_topic( $post );
+
+	// Bail if the post object isn't a topic.
+	if ( empty( $topic ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a topic's post status is transitioned.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The old post status.
+	 * @param WP_Post $topic      The topic post object.
+	 */
+	do_action( 'bbp_transition_topic_status', $new_status, $old_status, $topic );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a topic's post status to a public status from a
+ * draft/new status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $topic      The topic post object.
+ *
+ * @return bool
+ */
+function bbp_transition_topic_status_new_public( $new_status, $old_status, $topic ) {
+
+	// Validate the topic.
+	$topic = bbp_get_topic( $topic );
+
+	// Bail if the post object isn't a topic.
+	if ( empty( $topic ) ) {
+		return false;
+	}
+
+	// Is the new status public?
+	if ( ! in_array( $new_status, bbp_get_public_topic_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status draft or new?
+	if ( ! in_array( $old_status, bbp_get_draft_new_topic_statuses(), true ) ) {
+		return false;
+	}
+
+	$topic_id = bbp_get_topic_id( $topic->ID );
+
+	// Store the transitioned topic id.
+	bbp_store_transitioned_post_id( $topic_id, 'new_public' );
+
+	/**
+	 * Fires when a topic's post status is transitioned to a public status from
+	 * a draft/new status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transition_topic_status_new_public', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a topic's post status to a moderated status
+ * from a draft/new status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $topic      The topic post object.
+ *
+ * @return bool
+ */
+function bbp_transition_topic_status_new_moderated( $new_status, $old_status, $topic ) {
+
+	// Validate the topic.
+	$topic = bbp_get_topic( $topic );
+
+	// Bail if the post object isn't a topic.
+	if ( empty( $topic ) ) {
+		return false;
+	}
+
+	// Is the new status moderated?
+	if ( ! in_array( $new_status, bbp_get_moderated_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status draft or new?
+	if ( ! in_array( $old_status, bbp_get_draft_new_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$topic_id = bbp_get_topic_id( $topic->ID );
+
+	// Store the transitioned topic id.
+	bbp_store_transitioned_post_id( $topic_id, 'new_moderated' );
+
+	/**
+	 * Fires when a topic's post status is transitioned to a moderated status
+	 * from a draft/new status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transition_topic_status_new_moderated', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a topic's post status to a public status from a
+ * moderated status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $topic      The topic post object.
+ *
+ * @return bool
+ */
+function bbp_transition_topic_status_public( $new_status, $old_status, $topic ) {
+
+	// Validate the topic.
+	$topic = bbp_get_topic( $topic );
+
+	// Bail if the post object isn't a topic.
+	if ( empty( $topic ) ) {
+		return false;
+	}
+
+	// Is the new status public?
+	if ( ! in_array( $new_status, bbp_get_public_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status moderated?
+	if ( ! in_array( $old_status, bbp_get_moderated_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$topic_id = bbp_get_topic_id( $topic->ID );
+
+	// Store the transitioned topic id.
+	bbp_store_transitioned_post_id( $topic_id, 'public' );
+
+	/**
+	 * Fires when a topic's post status is transitioned to a public status from
+	 * a moderated status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transition_topic_status_public', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called when transitioning a topic's post status to a moderated status from a
+ * public status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param string  $new_status The new post status.
+ * @param string  $old_status The old post status.
+ * @param WP_Post $topic      The topic post object.
+ *
+ * @return bool
+ */
+function bbp_transition_topic_status_moderated( $new_status, $old_status, $topic ) {
+
+	// Validate the topic.
+	$topic = bbp_get_topic( $topic );
+
+	// Bail if the post object isn't a topic.
+	if ( empty( $topic ) ) {
+		return false;
+	}
+
+	// Is the new status moderated?
+	if ( ! in_array( $new_status, bbp_get_moderated_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	// Is the old status public?
+	if ( ! in_array( $old_status, bbp_get_public_reply_statuses(), true ) ) {
+		return false;
+	}
+
+	$topic_id = bbp_get_topic_id( $topic->ID );
+
+	// Store the transitioned topic id.
+	bbp_store_transitioned_post_id( $topic_id, 'moderated' );
+
+	/**
+	 * Fires when a topic's post status is transitioned to a moderated status
+	 * from a public status.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transition_topic_status_moderated', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a topic's post status to a public status from a
+ * draft/new status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $topic_id The topic id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_topic_status_new_public( $topic_id = 0 ) {
+	$topic_id = bbp_get_topic_id( $topic_id );
+
+	if ( empty( $topic_id ) || ! bbp_is_topic( $topic_id ) ) {
+		return false;
+	}
+
+	// Bail if the topic wasn't transitioned to a new public status.
+	if ( ! bbp_is_post_transitioned_new_public( $topic_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a topic's post status is transitioned to a public status from
+	 * a draft/new status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transitioned_topic_status_new_public', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a topic's post status to a moderated status from a
+ * draft/new status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $topic_id The topic id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_topic_status_new_moderated( $topic_id = 0 ) {
+	$topic_id = bbp_get_topic_id( $topic_id );
+
+	if ( empty( $topic_id ) || ! bbp_is_topic( $topic_id ) ) {
+		return false;
+	}
+
+	// Bail if the topic wasn't transitioned to a new moderated status.
+	if ( ! bbp_is_post_transitioned_new_moderated( $topic_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a topic's post status is transitioned to a moderated status
+	 * from a draft/new status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transitioned_topic_status_new_moderated', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a topic's post status to a public status from a
+ * moderated status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $topic_id The topic id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_topic_status_public( $topic_id = 0 ) {
+	$topic_id = bbp_get_topic_id( $topic_id );
+
+	if ( empty( $topic_id ) || ! bbp_is_topic( $topic_id ) ) {
+		return false;
+	}
+
+	// Bail if the topic wasn't transitioned to a public status.
+	if ( ! bbp_is_post_transitioned_public( $topic_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a topic's post status is transitioned to a public status from
+	 * a public status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transitioned_topic_status_public', $topic_id );
+
+	return true;
+}
+
+/**
+ * Called after transitioning a topic's post status to a moderated status from a
+ * public status and it's post meta has been updated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $topic_id The topic id.
+ *
+ * @return bool
+ */
+function bbp_transitioned_topic_status_moderated( $topic_id = 0 ) {
+	$topic_id = bbp_get_topic_id( $topic_id );
+
+	if ( empty( $topic_id ) || ! bbp_is_topic( $topic_id ) ) {
+		return false;
+	}
+
+	// Bail if the topic wasn't transitioned to a moderated status.
+	if ( ! bbp_is_post_transitioned_moderated( $topic_id ) ) {
+		return false;
+	}
+
+	/**
+	 * Fires when a topic's post status is transitioned to a moderated status
+	 * from a public status and it's post meta has been updated.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param int $topic_id The topic id.
+	 */
+	do_action( 'bbp_transitioned_topic_status_moderated', $topic_id );
+
+	return true;
 }
 
 /** Settings ******************************************************************/

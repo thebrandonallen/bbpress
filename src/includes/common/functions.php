@@ -1952,3 +1952,180 @@ function bbp_set_404() {
 
 	$wp_query->set_404();
 }
+
+/** Statuses ******************************************************************/
+
+/**
+ * Store the transitioned forum/topic/reply id along with it's transitioned
+ * status (new/public/moderated).
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int    $post_id The forum/topic/reply id.
+ * @param string $status  The transition status. Expects new/public/moderated.
+ *
+ * @return void
+ */
+function bbp_store_transitioned_post_id( $post_id = 0, $status = '' ) {
+
+	// Bail if we don't have all the necessary data.
+	if ( empty( $post_id ) || empty( $status ) ) {
+		return;
+	}
+
+	// Grab the globals.
+	$bbp                = bbpress();
+	$transitioned_posts = (array) $bbp->transitioned_posts;
+
+	// Store the transitioned post.
+	$transitioned_posts[ $post_id ] = $status;
+
+	// Add the new array back to the bbPress::transitioned_posts.
+	$bbp->transitioned_posts = $transitioned_posts;
+}
+
+/**
+ * Returns the transitioned post status.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $post_id The forum/topic/reply id.
+ *
+ * @return string new/public/moderated. Empty on failure.
+ */
+function bbp_get_post_transitioned_status( $post_id = 0 ) {
+
+	// The bbPress global.
+	$bbp = bbpress();
+
+	// Get the transitioned post status.
+	$status = empty( $bbp->transitioned_posts[ $post_id ] )
+			  ? ''
+			  : $bbp->transitioned_posts[ $post_id ];
+
+	/**
+	 * Filters the return of `bbp_get_post_transitioned_status()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param string $status  new/public/moderated. Empty on failure.
+	 * @param int    $post_id The forum/topic/reply id.
+	 */
+	return apply_filters( 'bbp_get_post_transitioned_status', $status, $post_id );
+}
+
+/**
+ * Checks if a given post id was transitioned to new public.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $post_id The forum/topic/reply id.
+ *
+ * @return bool True if the post id was transitioned to new public.
+ */
+function bbp_is_post_transitioned_new_public( $post_id = 0 ) {
+
+	// Default to false.
+	$retval = false;
+
+	if ( 'new_public' === bbp_get_post_transitioned_status( $post_id ) ) {
+		$retval = true;
+	}
+
+	/**
+	 * Filters the return of `bbp_is_post_transitioned_new_public()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param bool $retval  True if the post was transitioned to new public.
+	 * @param int  $post_id The forum/topic/reply id.
+	 */
+	return apply_filters( 'bbp_is_post_transitioned_new_public', $retval, $post_id );
+}
+
+/**
+ * Checks if a given post id was transitioned to new moderated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $post_id The forum/topic/reply id.
+ *
+ * @return bool True if the post id was transitioned to new moderated.
+ */
+function bbp_is_post_transitioned_new_moderated( $post_id = 0 ) {
+
+	// Default to false.
+	$retval = false;
+
+	if ( 'new_moderated' === bbp_get_post_transitioned_status( $post_id ) ) {
+		$retval = true;
+	}
+
+	/**
+	 * Filters the return of `bbp_is_post_transitioned_new_moderated()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param bool $retval  True if the post was transitioned to new moderated.
+	 * @param int  $post_id The forum/topic/reply id.
+	 */
+	return apply_filters( 'bbp_is_post_transitioned_new_moderated', $retval, $post_id );
+}
+
+/**
+ * Checks if a given post id was transitioned public.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $post_id The forum/topic/reply id.
+ *
+ * @return bool True if the post id was transitioned public.
+ */
+function bbp_is_post_transitioned_public( $post_id = 0 ) {
+
+	// Default to false.
+	$retval = false;
+
+	if ( 'public' === bbp_get_post_transitioned_status( $post_id ) ) {
+		$retval = true;
+	}
+
+	/**
+	 * Filters the return of `bbp_is_post_transitioned_public()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param bool $retval  True if the post was transitioned public.
+	 * @param int  $post_id The forum/topic/reply id.
+	 */
+	return apply_filters( 'bbp_is_post_transitioned_public', $retval, $post_id );
+}
+
+/**
+ * Checks if a given post id was transitioned moderated.
+ *
+ * @since x.x.x bbPress (rXXXX)
+ *
+ * @param int $post_id The forum/topic/reply id.
+ *
+ * @return bool True if the post id was transitioned moderated.
+ */
+function bbp_is_post_transitioned_moderated( $post_id = 0 ) {
+
+	// Default to false.
+	$retval = false;
+
+	if ( 'moderated' === bbp_get_post_transitioned_status( $post_id ) ) {
+		$retval = true;
+	}
+
+	/**
+	 * Filters the return of `bbp_is_post_transitioned_moderated()`.
+	 *
+	 * @since x.x.x bbPress (rXXXX)
+	 *
+	 * @param bool $retval  True if the post was transitioned moderated.
+	 * @param int  $post_id The forum/topic/reply id.
+	 */
+	return apply_filters( 'bbp_is_post_transitioned_moderated', $retval, $post_id );
+}
