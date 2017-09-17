@@ -166,7 +166,7 @@ class BBP_Forums_Group_Extension extends BP_Group_Extension {
 
 		// Additional BuddyPress specific single-forum conditionals
 		if ( false === $retval ) {
-			if ( bp_is_group() && bp_is_current_action( $this->slug ) ) {
+			if ( bp_is_group() && ( bp_is_current_action( $this->slug ) && ! bp_is_action_variable( $this->topic_slug, 0 ) ) ) {
 				$retval = true;
 			}
 		}
