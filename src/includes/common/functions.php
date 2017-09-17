@@ -1691,6 +1691,11 @@ function bbp_update_post_family_caches( $objects = array() ) {
 	foreach ( $objects as $object ) {
 		$object = get_post( $object );
 
+		// Continue on if the post doesn't exist.
+		if ( ! empty( $object->ID ) ) {
+			continue;
+		}
+
 		// Meta IDs
 		foreach ( $ids as $key ) {
 			$post_ids[] = get_post_meta( $object->ID, $key, true );
@@ -1745,8 +1750,12 @@ function bbp_update_post_author_caches( $objects = array() ) {
 
 	// Get the user IDs
 	foreach ( $objects as $object ) {
-		$object     = get_post( $object );
-		$user_ids[] = get_post_field( 'post_author', $object->ID );
+		$object = get_post( $object );
+
+		// If post exists, add post author to the array.
+		if ( ! empty( $object->ID ) {
+			$user_ids[] = get_post_field( 'post_author', $object->ID );
+		}
 	}
 
 	// Unique, non-zero values
